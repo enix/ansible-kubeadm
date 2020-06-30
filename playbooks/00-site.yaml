@@ -1,0 +1,17 @@
+---
+- hosts: kube_control_plane
+  roles:
+    - role: cp-preflight-check
+#    - role: system-prepare
+    - role: packages
+      vars:
+        control_plane_pkgs: true
+    - role: apiserver-proxy
+    - role: control-plane-init
+
+- hosts: kube_nodes
+  roles:
+    - role: nodes-preflight-check
+    - role: packages
+    - role: apiserver-proxy
+    - role: worker-plane-join

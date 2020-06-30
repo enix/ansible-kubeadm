@@ -1,0 +1,12 @@
+namespace: "enix"
+name: "ansible_kubeadm"
+version: "1.0.12"
+readme: "README.md"
+authors:
+    - "Zempashi <julien.girardin@enix.fr>"
+license:
+    - "MIT"
+tags:
+    - kubeadm
+    - kubernetes
+repository: "https://gitlab.enix.io/kubernetes/ansible-kubeadm"

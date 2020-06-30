@@ -1,0 +1,18 @@
+---
+- name: 'Add kubernetes repo signing key'
+  apt_key:
+    url: '{{ kubernetes_repository.gpg_url }}'
+    state: present
+
+- name: 'Add the kubernetes repository'
+  apt_repository:
+    repo: '{{ kubernetes_repository.repo_url }}'
+    state: present
+  register: kube_repo_just_added
+
+- name: 'refresh source list'
+  apt:
+    update_cache: yes
+  when: >-
+    kube_repo_just_added is changed
+    or force_apt_update|bool

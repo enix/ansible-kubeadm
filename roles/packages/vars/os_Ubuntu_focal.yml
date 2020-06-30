@@ -1,0 +1,7 @@
+---
+repository_dependencies:
+  - apt-transport-https
+  - ca-certificates
+  - gnupg
+
+python_openssl: python-openssl

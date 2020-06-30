@@ -1,0 +1,31 @@
+---
+- name: 'Get list of bootstrap token'
+  kubectl:
+    state: get
+    resource_type: secret
+    namespace: kube-system
+    extra_args: '--field-selector=type=bootstrap.kubernetes.io/token'
+    kubeconfig: /etc/kubernetes/admin.conf
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
+  register: bootstrap_tokens
+
+- debug:
+    var: bootstrap_tokens
+    verbosity: 1
+  run_once: true
+
+- name: 'Filter expire token'
+  set_fact:
+    valid_bootstrap_tokens: >-
+      [ {% for token in bootstrap_tokens['items'] if
+            token.data.expiration|b64decode|to_datetime('%Y-%m-%dT%H:%M:%SZ')
+            >= ansible_date_time.iso8601|to_datetime('%Y-%m-%dT%H:%M:%SZ') -%}
+           {{ token }}
+        {%- endfor -%} ]
+  run_once: true
+
+- debug:
+    var: valid_bootstrap_tokens
+    verbosity: 1
+  run_once: true

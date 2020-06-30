@@ -1,0 +1,6 @@
+---
+force_apiserver_proxy:
+
+apiserver_proxy_manifest: '/etc/kubernetes/manifests/apiserver-proxy.yaml'
+
+apiserver_proxy_port: 7443

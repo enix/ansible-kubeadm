@@ -1,0 +1,50 @@
+---
+- name: 'get kubeadm configmap if cluster running'
+  kubectl:
+    state: get
+    namespace: kube-system
+    resource_type: cm
+    name: kubeadm-config
+    kubeconfig: /etc/kubernetes/admin.conf
+  run_once: true
+  delegate_to: '{{ cp_running_hosts|first }}'
+  when: cp_running_hosts|length > 0
+  register: in_cluster_kubeadm_config
+
+- debug:
+    var: in_cluster_kubeadm_config
+    verbosity: 1
+  run_once: true
+
+- name: 'compute control_plane_endpoint'
+  set_fact:
+    cluster_config_orig: '{{ cluster_config_orig }}'
+    control_plane_endpoint: >-
+      {% if control_plane_endpoint is defined -%}
+         {{ control_plane_endpoint }}
+      {%- elif cluster_config_orig.controlPlaneEndpoint is defined -%}
+         {{ cluster_config_orig.controlPlaneEndpoint }}
+      {%- elif ansible_play_hosts|length > 1 -%}
+         127.0.0.1:7443
+      {%- endif -%}
+    target_version: >-
+      {{ cluster_config_orig.get("kubernetesVersion", "")
+         |regex_replace("v(.*)", "\g<1>")}}
+  run_once: true
+  vars:
+    cluster_config_orig: >-
+      {%- if cp_running_hosts|length == 0 -%}
+        {}
+      {%- else -%}
+        {{ in_cluster_kubeadm_config.item.data.ClusterConfiguration|from_yaml }}
+      {%- endif -%}
+
+- debug:
+    var: control_plane_endpoint
+    verbosity: 1
+  run_once: true
+
+- debug:
+    var: target_version
+    verbosity: 1
+  run_once: true

@@ -1,0 +1,34 @@
+---
+- name: 'assert required variable are present'
+  assert:
+    that:
+      - control_plane_endpoint is defined
+
+- name: 'compute installation status'
+  set_fact:
+    apiserver_proxy_install: >-
+      {%- if force_apiserver_proxy is not none -%}
+         {{ force_apiserver_proxy|bool }}
+      {%- elif ('tcp://' ~ control_plane_endpoint)|urlsplit('hostname') == "127.0.0.1" -%}
+         true
+      {%- else -%}
+         false
+      {%- endif -%}
+    apiserver_proxy_port: >-
+      {%- if control_plane_endpoint -%}
+        {{ ('tcp://' ~ control_plane_endpoint)|urlsplit('port') }}
+      {%- else -%}
+        {{ apiserver_proxy_port }}
+      {%- endif -%}
+
+- name: 'Install apiserver-proxy'
+  template:
+    src: apiserver-proxy.yaml.j2
+    dest: '{{ apiserver_proxy_manifest }}'
+  when: apiserver_proxy_install|bool
+
+- name: 'Uninstall apiserver-proxy'
+  file:
+    dest: '{{ apiserver_proxy_manifest }}'
+    state: absent
+  when: not apiserver_proxy_install|bool

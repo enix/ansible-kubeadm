@@ -1,0 +1,11 @@
+---
+- name: 'hold package'
+  dpkg_selections:
+    name: '{{ item }}'
+    selection: '{{ package_action }}'
+  with_items: >-
+   {%- if control_plane_pkgs|bool-%}
+     {{ node_packages + control_plane_packages }}
+   {%- else -%}
+     {{ node_packages }}
+   {%- endif -%}

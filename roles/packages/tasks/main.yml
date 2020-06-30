@@ -1,0 +1,75 @@
+---
+- name: 'Assert required values are set'
+  assert:
+    that:
+      - kube_version is defined
+      - kube_version is string
+
+- name: 'Include OS specific variables'
+  include_vars: '{{ item }}'
+  with_fileglob:
+    - 'vars/os_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'vars/os_{{ ansible_distribution }}.yml'
+    - 'vars/os_{{ ansible_os_family }}.yml'
+
+- name: 'Install repository dependencies'
+  package:
+    name: '{{ repository_dependencies }}'
+    state: present
+
+- name: 'Add kubernetes repository'
+  include_tasks: '{{ item }}'
+  with_first_found:
+    - 'kube_repo_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'kube_repo_{{ ansible_distribution }}.yml'
+    - 'kube_repo_{{ ansible_os_family }}.yml'
+
+- name: 'find version of kubeadm to install'
+  pkg_version_match:
+    name: kubeadm
+    version: '{{ kube_version }}'
+  register: kubeadm_version
+
+- debug:
+    var: kubeadm_version
+    verbosity: 1
+
+- name: 'Compute list of packages'
+  set_fact:
+    kube_package_list: >-
+      {%- if control_plane_pkgs|bool-%}
+        {%- set pkg_list = node_packages + control_plane_packages -%}
+      {%- else -%}
+        {%- set pkg_list = node_packages -%}
+      {%- endif -%}
+      [ {%- for pkg in pkg_list -%}
+          {%- set version = packages_force_version[pkg]|default(kubeadm_version.version) -%}
+          '{{ pkg }}{{ version|ternary("=" ~ version, "") }}',
+        {%- endfor -%} ]
+
+- name: 'Display package to install'
+  debug:
+    var: kube_package_list
+
+- name: 'Pause before installing package'
+  pause:
+  when: pause_berore_kube_pkg_install|bool
+
+- name: 'Install kubernetes packages'
+  action: '{{ ansible_pkg_mgr }}'
+  args:
+    name: '{{ kube_package_list }}'
+    state: 'present'
+    force: '{{ (ansible_pkg_mgr == "apt")|ternary(true, omit) }}'
+    allow_downgrade: '{{ (ansible_pkg_mgr in ["yum", "dnf"])|ternary(true, omit) }}'
+
+- name: 'hold/lock kubernetes packages'
+  include_tasks: '{{ file_tasks }}'
+  loop_control:
+    loop_var: file_tasks
+  vars:
+    package_action: hold
+  with_first_found:
+    - 'pkg_hold_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'pkg_hold_{{ ansible_distribution }}.yml'
+    - 'pkg_hold_{{ ansible_os_family }}.yml'

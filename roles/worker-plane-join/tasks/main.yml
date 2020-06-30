@@ -1,0 +1,45 @@
+---
+- name: 'Assert required variable are present'
+  assert:
+    that:
+      - kube_version is defined
+      - kube_version is string
+      - ca_info is defined
+      - valid_bootstrap_tokens is defined
+      - valid_bootstrap_tokens|length > 0
+      - control_plane_endpoint is defined
+
+- name: 'list all node'
+  kubectl:
+    state: get
+    resource_type: nodes
+    kubeconfig: /etc/kubernetes/admin.conf
+  run_once: true
+  delegate_to: '{{ groups.kube_control_plane|first }}'
+  register: current_nodes
+
+- name: 'display current node'
+  debug:
+    var: current_nodes
+    verbosity: 1
+
+- name: 'display control_plane_endpoint'
+  debug:
+    var: control_plane_endpoint
+    verbosity: 1
+
+- name: 'join node that are not already joined'
+  command: >-
+    kubeadm join
+    {% if control_plane_endpoint %}
+       {{ control_plane_endpoint }}
+    {% else %}
+       {{ hostvars[groups.kube_control_plane|first].ansible_default_ipv4.address }}:6443
+    {% endif %}
+    --token {{ token_data['token-id']|b64decode }}.{{ token_data['token-secret']|b64decode }}
+    --discovery-token-ca-cert-hash sha256:{{ ca_info.public_key_fingerprints.sha256.replace(':', '') }}
+  register: kubeadm_node_join
+  when: ansible_nodename not in nodes_list
+  vars:
+    nodes_list: '{{ current_nodes["items"]|map(attribute="metadata.name")|list }}'
+    token_data: '{{ (valid_bootstrap_tokens|first).data }}'
