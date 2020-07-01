@@ -1,7 +1,33 @@
 ---
 stages:
-  - build
+  - pre-build
+  - lint
   - test
 
 include: .gitlab-ci/build-tooling-image.yml
 
+yamllint:
+  stage: lint
+  image: docker-registry.enix.io/kubernetes/ansible-kubeadm/tooling:latest
+  script:
+    - tox -e tools -- yamllint .
+
+ansible-lint:
+  stage: lint
+  image: docker-registry.enix.io/kubernetes/ansible-kubeadm/tooling:latest
+  script:
+    - tox -e tools -- ansible-lint
+
+openstack-tests:
+  stage: test
+  image: docker-registry.enix.io/kubernetes/ansible-kubeadm/tooling:latest
+  variables:
+    TF_VAR_stem: "${CI_JOB_ID}"
+  before_script:
+    - ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
+    - git config --global url."https://gitlab.enix.io".insteadOf "ssh://git@gitlab.enix.io"
+    - git config --global credential.helper $(readlink -f tests/git-creds.sh)
+    - tox -e tests --notest
+    - .tox/tests/bin/ansible-galaxy install -r tests/ansible.requirements.yml -p tests/playbooks/roles
+  script:
+    - tox -e tests -- -s

@@ -53,7 +53,7 @@
 
 - name: 'Pause before installing package'
   pause:
-  when: pause_berore_kube_pkg_install|bool
+  when: pause_before_kube_pkg_install|bool
 
 - name: 'Install kubernetes packages'
   action: '{{ ansible_pkg_mgr }}'

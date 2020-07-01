@@ -31,7 +31,12 @@
 # TODO: fix two following tasks to be more platform dependent
 - name: 'install python-openssl'
   package:
-    name: '{{ python_openssl }}'
+    name: >-
+      {%- if ansible_python.version.major > 2 -%}
+         {{ python3_openssl }}
+      {%- else -%}
+         {{ python2_openssl }}
+      {%- endif -%}
     state: present
   run_once: true
   delegate_to: '{{ kubeadm_host }}'

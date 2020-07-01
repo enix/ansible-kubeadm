@@ -2,4 +2,4 @@
 control_plane_pkgs: false
 
 force_apt_update: false
-pause_berore_kube_pkg_install: false
+pause_before_kube_pkg_install: false

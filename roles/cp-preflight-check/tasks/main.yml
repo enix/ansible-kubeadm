@@ -35,7 +35,6 @@
 # Then look at possible version of kubeadm that match this version (ex: 1.17.8-01)
 # Retain the kubeadm if match found, fallback on kubernetes otherwise
 # Last fallback is the default version, if no cluster running
-
 - name: 'Export variable for other hosts'
   set_fact:
     kube_version: >-

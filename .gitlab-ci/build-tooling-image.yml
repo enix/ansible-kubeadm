@@ -1,12 +1,10 @@
 ---
 build-tooling-image:
-  stage: build
+  stage: pre-build
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
-    # @see https://github.com/GoogleContainerTools/kaniko/issues/1227
-    - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --cache=true --context .gitlab-ci/tooling --dockerfile .gitlab-ci/tooling/Dockerfile --destination $CI_REGISTRY_IMAGE/tooling:latest
   only:

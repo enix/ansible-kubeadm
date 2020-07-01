@@ -1,4 +1,8 @@
 ---
+- name: 'Set default kubeadm-config if empty set'
+  set_fact:
+    cluster_config_orig: '{{ cluster_config_orig|default(default_kubeadm_config, true) }}'
+
 - name: 'merge requested kubeadm config with existing one'
   set_fact:
     cluster_config_final: >-
