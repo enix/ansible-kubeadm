@@ -1,0 +1,7 @@
+---
+stages:
+  - build
+  - test
+
+include: .gitlab-ci/build-tooling-image.yml
+
