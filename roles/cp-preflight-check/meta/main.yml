@@ -1,3 +1,17 @@
 ---
 dependencies:
   - role: kubectl-module
+galaxy_info:
+  author: Julien Girardin
+  description: Check and vars initialization for kubeadm
+  company: Enix
+  license: Apache
+  min_ansible_version: 2.7
+  platforms:
+  - name: Ubuntu
+    versions:
+      - 18.04
+      - 20.04
+  galaxy_tags:
+    - kubernetes
+    - kubeadm

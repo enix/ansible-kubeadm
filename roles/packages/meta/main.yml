@@ -1,9 +1,8 @@
 ---
-dependencies:
-  - role: kubectl-module
+dependencies: []
 galaxy_info:
   author: Julien Girardin
-  description: Create kubeadm config and init kubernetes cluster
+  description: Install kubernetes related packages
   company: Enix
   license: Apache
   min_ansible_version: 2.7
@@ -15,3 +14,5 @@ galaxy_info:
   galaxy_tags:
     - kubernetes
     - kubeadm
+    - kubelet
+    - kubectl
