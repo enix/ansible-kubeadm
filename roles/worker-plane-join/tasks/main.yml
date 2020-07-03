@@ -2,8 +2,6 @@
 - name: 'Assert required variable are present'
   assert:
     that:
-      - kube_version is defined
-      - kube_version is string
       - ca_info is defined
       - valid_bootstrap_tokens is defined
       - valid_bootstrap_tokens|length > 0

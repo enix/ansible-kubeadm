@@ -1,3 +1,2 @@
 roles:
-  - name: geerlingguy.docker
   - src: git+ssh://git@gitlab.enix.io/ansible/fix-dns

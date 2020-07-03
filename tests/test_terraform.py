@@ -44,10 +44,12 @@ def prepared_vm(inventory, running_vm):
 
 
 def test_install(inventory, prepared_vm):
-    result = ansible_runner.run(
-        envvars={'ANSIBLE_HOST_KEY_CHECKING': 'false',
+    for playbook in ['apiserver-proxy.yml',
+                     '00-site.yml']:
+        result = ansible_runner.run(
+            envvars={'ANSIBLE_HOST_KEY_CHECKING': 'false',
                  'ANSIBLE_FORCE_COLOR': 'true'},
-        inventory=inventory,
-        playbook='{}/../playbooks/00-site.yml'.format(os.getcwd())
-    )
-    assert result.status == 'successful'
+            inventory=inventory,
+            playbook=os.path.join('{}/../playbooks/'.format(os.getcwd()), playbook)
+        )
+        assert result.status == 'successful'

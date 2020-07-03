@@ -18,10 +18,10 @@
 - name: 'Filter expire token'
   set_fact:
     valid_bootstrap_tokens: >-
-      [ {% for token in bootstrap_tokens['items'] if
+      [ {%- for token in bootstrap_tokens['items'] if
             token.data.expiration|b64decode|to_datetime('%Y-%m-%dT%H:%M:%SZ')
             >= ansible_date_time.iso8601|to_datetime('%Y-%m-%dT%H:%M:%SZ') -%}
-           {{ token }}
+           {{ token }},
         {%- endfor -%} ]
   run_once: true
 

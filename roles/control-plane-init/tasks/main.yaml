@@ -11,7 +11,7 @@
 - name: 'Manage kubeadm config'
   import_tasks: kubeadm_config.yml
 
-- name: 'kubeadm init control init'
+- name: 'Kubeadm init control init'
   command: kubeadm init --config {{ kubeadm_config_yaml }}
   run_once: true
   delegate_to: '{{ kubeadm_host }}'
@@ -29,7 +29,7 @@
   when: valid_bootstrap_tokens|length == 0
 
 # TODO: fix two following tasks to be more platform dependent
-- name: 'install python-openssl'
+- name: 'Install python-openssl'
   package:
     name: >-
       {%- if ansible_python.version.major > 2 -%}
@@ -41,7 +41,7 @@
   run_once: true
   delegate_to: '{{ kubeadm_host }}'
 
-- name: 'get info from ca'
+- name: 'Get info from ca'
   openssl_certificate_info:
     path: /etc/kubernetes/pki/ca.crt
   run_once: true
@@ -52,3 +52,54 @@
     var: ca_info
     verbosity: 1
   run_once: true
+
+- name: 'List current nodes'
+  kubectl:
+    state: get
+    resource_type: nodes
+    kubeconfig: /etc/kubernetes/admin.conf
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
+  register: current_nodes
+
+- name: 'Compute list of "to-join" nodes'
+  set_fact:
+    to_join_cp: >-
+      {{ ansible_play_hosts|difference(
+        current_nodes["items"]|map(attribute="metadata.name")) }}
+    cert_encryption_key: >-
+      {{ lookup('password', '/dev/null  length=64 chars=hexdigits') }}
+  run_once: true
+
+- debug:
+    var: to_join_cp
+    verbosity: 1
+  run_once: true
+
+- name: 'Upload certificates if control-plane node need to be joined'
+  command: >-
+    kubeadm init phase upload-certs
+    --upload-certs
+    --certificate-key {{ cert_encryption_key }}
+  no_log: '{{ sensitive_debug|bool }}'
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
+  when: to_join_cp|length > 0
+
+- name: 'Join control plane node'
+  command:
+    kubeadm join
+    {% if control_plane_endpoint %}
+       {{ control_plane_endpoint }}
+    {% else %}
+       {{ hostvars[groups.kube_control_plane|first].ansible_default_ipv4.address }}:6443
+    {% endif %}
+    --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests
+    --ignore-preflight-errors=Port-10250
+    --token {{ token_data['token-id']|b64decode }}.{{ token_data['token-secret']|b64decode }}
+    --discovery-token-ca-cert-hash sha256:{{ ca_info.public_key_fingerprints.sha256.replace(':', '') }}
+    --control-plane --certificate-key {{ cert_encryption_key }}
+  when: ansible_nodename not in nodes_list
+  vars:
+    nodes_list: '{{ current_nodes["items"]|map(attribute="metadata.name")|list }}'
+    token_data: '{{ (valid_bootstrap_tokens|first).data }}'

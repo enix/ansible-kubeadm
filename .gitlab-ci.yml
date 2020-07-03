@@ -28,6 +28,7 @@ openstack-tests:
     - git config --global url."https://gitlab.enix.io".insteadOf "ssh://git@gitlab.enix.io"
     - git config --global credential.helper $(readlink -f tests/git-creds.sh)
     - tox -e tests --notest
+    - .tox/tests/bin/ansible-galaxy install -r ansible.requirements.yml -p tests/playbooks/roles
     - .tox/tests/bin/ansible-galaxy install -r tests/ansible.requirements.yml -p tests/playbooks/roles
   script:
     - tox -e tests -- -s

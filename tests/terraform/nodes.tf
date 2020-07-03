@@ -5,7 +5,7 @@ resource "openstack_compute_servergroup_v2" "node_group" {
 
 resource "openstack_compute_instance_v2" "nodes" {
   name            = "${var.stem}-node-${count.index + 1}"
-  image_name      = "Ubuntu 18.04.4 20200324"
+  image_name      = var.image_name
   flavor_name     = "GP1.S"
   key_pair        = openstack_compute_keypair_v2.ssh_deploy.name
   security_groups = ["default", "${openstack_compute_secgroup_v2.kubeadm.name}"]

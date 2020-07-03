@@ -1,34 +1,46 @@
 ---
-- name: 'assert required variable are present'
-  assert:
-    that:
-      - control_plane_endpoint is defined
+- name: 'Include OS specific variables'
+  include_vars: '{{ item }}'
+  with_fileglob:
+    - 'vars/os_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'vars/os_{{ ansible_distribution }}.yml'
+    - 'vars/os_{{ ansible_os_family }}.yml'
 
-- name: 'compute installation status'
-  set_fact:
-    apiserver_proxy_install: >-
-      {%- if force_apiserver_proxy is not none -%}
-         {{ force_apiserver_proxy|bool }}
-      {%- elif ('tcp://' ~ control_plane_endpoint)|urlsplit('hostname') == "127.0.0.1" -%}
-         true
-      {%- else -%}
-         false
-      {%- endif -%}
-    apiserver_proxy_port: >-
-      {%- if control_plane_endpoint -%}
-        {{ ('tcp://' ~ control_plane_endpoint)|urlsplit('port') }}
-      {%- else -%}
-        {{ apiserver_proxy_port }}
-      {%- endif -%}
+- name: 'install docker-python binding'
+  package:
+    name:
+      - docker-compose
+      - >
+        {%- if ansible_python.version.major > 2 -%}
+          {{ python3_docker }}
+        {%- else -%}
+          {{ python2_docker }}
+        {%- endif -%}
+    state: present
+  register: compose_installed
+
+- name: 'create stack directory'
+  file:
+    dest: '{{ apiserver_proxy_stack_dir }}'
+    state: directory
 
 - name: 'Install apiserver-proxy'
-  template:
-    src: apiserver-proxy.yaml.j2
-    dest: '{{ apiserver_proxy_manifest }}'
-  when: apiserver_proxy_install|bool
+  copy:
+    src: docker-compose.yaml
+    dest: '{{ apiserver_proxy_stack_dir }}/docker-compose.yaml'
 
-- name: 'Uninstall apiserver-proxy'
-  file:
-    dest: '{{ apiserver_proxy_manifest }}'
-    state: absent
-  when: not apiserver_proxy_install|bool
+- name: 'Template environement variable'
+  template:
+    src: apiserver-proxy-endpoints.env.j2
+    dest: '{{ apiserver_proxy_stack_dir }}/apiserver-proxy-endpoints.env'
+
+- name: 'Start compose stack'
+  docker_compose:
+    project_src: '{{ apiserver_proxy_stack_dir }}'
+    state: present
+  when: >-
+    not(compose_installed is changed and ansible_check_mode)
+
+- name: 'export vars'
+  set_fact:
+    control_plane_endpoint: "127.0.0.1:{{ apiserver_proxy_port }}"

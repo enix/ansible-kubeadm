@@ -1,0 +1,4 @@
+---
+python2_docker: python-docker
+python3_docker: python3-docker
+docker_compose: docker-compose

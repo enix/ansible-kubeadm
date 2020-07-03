@@ -1,0 +1,9 @@
+---
+version: '3'
+services:
+  loadbalancer:
+    image: enix/kubernetes-api-loadbalancer:master
+    network_mode: host
+    restart: always
+    env_file:
+    - ./apiserver-proxy-endpoints.env

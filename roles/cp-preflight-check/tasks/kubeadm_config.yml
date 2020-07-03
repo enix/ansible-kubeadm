@@ -24,8 +24,6 @@
          {{ control_plane_endpoint }}
       {%- elif cluster_config_orig.controlPlaneEndpoint is defined -%}
          {{ cluster_config_orig.controlPlaneEndpoint }}
-      {%- elif ansible_play_hosts|length > 1 -%}
-         127.0.0.1:7443
       {%- endif -%}
     target_version: >-
       {{ cluster_config_orig.get("kubernetesVersion", "")
@@ -48,3 +46,10 @@
     var: target_version
     verbosity: 1
   run_once: true
+
+- name: 'Raise if condition unmet'
+  fail:
+    msg: >-
+      "control_plane_endpoint is not set and you provided multi-nodes control plane.
+      You need a reliable way to contact all the apiserver with a single endpoint.
+  when: not control_plane_endpoint and ansible_play_hosts | length > 1
