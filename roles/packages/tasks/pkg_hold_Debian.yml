@@ -3,9 +3,10 @@
   dpkg_selections:
     name: '{{ item }}'
     selection: '{{ package_action }}'
+  # noqa 104
   with_items: >-
-   {%- if control_plane_pkgs|bool-%}
-     {{ node_packages + control_plane_packages }}
-   {%- else -%}
-     {{ node_packages }}
-   {%- endif -%}
+    {%- if control_plane_pkgs|bool -%}
+      {{ node_packages + control_plane_packages }}
+    {%- else -%}
+      {{ node_packages }}
+    {%- endif -%}

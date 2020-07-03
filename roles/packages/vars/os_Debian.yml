@@ -6,7 +6,7 @@ kubernetes_repository:
 repository_dependencies:
   - apt-transport-https
   - ca-certificates
-  - gnupg2
+  - gnupg
 
 node_packages:
   - kubeadm
@@ -19,4 +19,5 @@ control_plane_packages:
 packages_force_version:
   kubernetes-cni:
 
-python_openssl: python3-openssl
+python2_openssl: python-openssl
+python3_openssl: python3-openssl

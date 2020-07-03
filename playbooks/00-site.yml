@@ -2,7 +2,6 @@
 - hosts: kube_control_plane
   roles:
     - role: cp-preflight-check
-#    - role: system-prepare
     - role: packages
       vars:
         control_plane_pkgs: true

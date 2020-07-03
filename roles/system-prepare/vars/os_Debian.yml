@@ -1,2 +1,0 @@
----
-sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf

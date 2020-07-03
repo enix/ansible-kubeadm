@@ -1,0 +1,14 @@
+---
+build-tooling-image:
+  stage: pre-build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --cache=true --context .gitlab-ci/tooling --dockerfile .gitlab-ci/tooling/Dockerfile --destination $CI_REGISTRY_IMAGE/tooling:latest
+  only:
+    changes:
+      - .gitlab-ci/tooling/*
+      - .gitlab-ci/build-tooling-image.yml
+

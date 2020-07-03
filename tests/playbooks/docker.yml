@@ -1,4 +1,10 @@
 ---
 - hosts: all
+  pre_tasks:
+    - name: 'update cache'
+      apt:
+        update_cache: true
   roles:
     - role: geerlingguy.docker
+      vars:
+        docker_install_compose: false

@@ -1,5 +1,5 @@
 namespace: "enix"
-name: "ansible_kubeadm"
+name: "kubeadm"
 version: "1.0.12"
 readme: "README.md"
 authors:
