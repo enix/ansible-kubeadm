@@ -22,6 +22,8 @@
 
 - name: 'Create bootstrap token if no valid found'
   command: kubeadm token create
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
   when: valid_bootstrap_tokens|length == 0
 
 - name: 'Retrieve a valid bootstrap token'
