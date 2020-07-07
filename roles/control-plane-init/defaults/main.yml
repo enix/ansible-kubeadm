@@ -1,4 +1,5 @@
 ---
+sensitive_debug: false
 cluster_config: {}
 
 kubeadm_config_yaml: '/tmp/kubeadm-config-{{ansible_date_time.iso8601 }}.yaml'

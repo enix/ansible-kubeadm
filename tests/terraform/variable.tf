@@ -3,7 +3,7 @@ variable "node_count" {
 }
 
 variable "control_plane_count" {
-  default = 1
+  default = 2
 }
 
 variable "image_name"{

@@ -5,7 +5,6 @@
     - role: packages
       vars:
         control_plane_pkgs: true
-    - role: apiserver-proxy
     - role: control-plane-init
     - role: user-kubeconfig
 
@@ -13,5 +12,4 @@
   roles:
     - role: nodes-preflight-check
     - role: packages
-    - role: apiserver-proxy
     - role: worker-plane-join
