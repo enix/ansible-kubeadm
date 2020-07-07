@@ -1,4 +1,4 @@
-variable "node_count" {
+variable "worker_count" {
   default = 1
 }
 
@@ -6,7 +6,7 @@ variable "control_plane_count" {
   default = 2
 }
 
-variable "image_name"{
+variable "image_name" {
   default = "Ubuntu 20.04 20200611"
 }
 

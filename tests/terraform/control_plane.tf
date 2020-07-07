@@ -15,7 +15,7 @@ resource "openstack_compute_instance_v2" "control_plane" {
   }
 
   scheduler_hints {
-      group = openstack_compute_servergroup_v2.node_group.id
+    group = openstack_compute_servergroup_v2.cp_group.id
   }
 
   metadata = {
