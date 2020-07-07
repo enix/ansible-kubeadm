@@ -3,8 +3,8 @@
 ${server} ansible_host=${ip}
 %{ endfor ~}
 
-[kube_nodes]
-%{ for server, ip in kube_nodes ~}
+[kube_workers]
+%{ for server, ip in kube_workers ~}
 ${server} ansible_host=${ip}
 %{ endfor ~}
 

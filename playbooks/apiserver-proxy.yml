@@ -1,3 +1,0 @@
-- hosts: kube_control_plane:kube_nodes
-  roles:
-    - role: apiserver-proxy

@@ -8,8 +8,8 @@
     - role: control-plane-init
     - role: user-kubeconfig
 
-- hosts: kube_nodes
+- hosts: kube_workers
   roles:
-    - role: nodes-preflight-check
+    - role: workers-preflight-check
     - role: packages
     - role: worker-plane-join
