@@ -3,7 +3,7 @@
   pre_tasks:
     - name: 'update cache'
       apt:
-        update_cache: true
+        cache_valid_time: 7200
   roles:
     - role: geerlingguy.docker
       vars:

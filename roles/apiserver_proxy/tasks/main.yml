@@ -1,0 +1,55 @@
+---
+- name: 'Include OS specific variables'
+  include_vars: '{{ item }}'
+  with_fileglob:
+    - 'vars/os_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'vars/os_{{ ansible_distribution }}.yml'
+    - 'vars/os_{{ ansible_os_family }}.yml'
+
+- name: 'install docker-python binding'
+  package:
+    name:
+      - docker-compose
+      - >
+        {%- if ansible_python.version.major > 2 -%}
+          {{ python3_docker }}
+        {%- else -%}
+          {{ python2_docker }}
+        {%- endif -%}
+    state: present
+  register: compose_installed
+
+- name: 'create stack directory'
+  file:
+    dest: '{{ apiserver_proxy_stack_dir }}'
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+
+- name: 'Install apiserver-proxy'
+  copy:
+    src: docker-compose.yaml
+    dest: '{{ apiserver_proxy_stack_dir }}/docker-compose.yaml'
+    owner: root
+    group: root
+    mode: 0600
+
+- name: 'Template environement variable'
+  template:
+    src: apiserver-proxy-endpoints.env.j2
+    dest: '{{ apiserver_proxy_stack_dir }}/apiserver-proxy-endpoints.env'
+    owner: root
+    group: root
+    mode: 0600
+
+- name: 'Start compose stack'
+  docker_compose:
+    project_src: '{{ apiserver_proxy_stack_dir }}'
+    state: present
+  when: >-
+    not(compose_installed is changed and ansible_check_mode)
+
+- name: 'export vars'
+  set_fact:
+    control_plane_endpoint: "127.0.0.1:{{ apiserver_proxy_port }}"

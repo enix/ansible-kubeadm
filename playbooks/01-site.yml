@@ -1,15 +1,24 @@
 ---
 - hosts: kube_control_plane
   roles:
-    - role: cp-preflight-check
+    - role: preflight_check_cp
+
+- hosts: kube_control_plane:kube_workers
+  roles:
+    - role: preflight_check_nodes
+
+- hosts: kube_control_plane
+  roles:
     - role: packages
       vars:
         control_plane_pkgs: true
-    - role: control-plane-init
-    - role: user-kubeconfig
+    - role: control_plane_init
+    - role: join_nodes
+      vars:
+        control_plane: true
+    - role: user_kubeconfig
 
 - hosts: kube_workers
   roles:
-    - role: workers-preflight-check
     - role: packages
-    - role: worker-plane-join
+    - role: join_nodes

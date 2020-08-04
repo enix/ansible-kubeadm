@@ -1,0 +1,89 @@
+---
+- name: 'Assert required variable are here'
+  assert:
+    that:
+      - cp_running_hosts is defined
+
+- name: 'Select candidate host to run init'
+  set_fact:
+    kubeadm_host: '{{ cp_running_hosts|default(ansible_play_hosts, true)|first }}'
+
+- name: 'Manage kubeadm config'
+  import_tasks: kubeadm_config.yml
+
+- name: 'Kubeadm init control init'
+  command: kubeadm init --config {{ kubeadm_config_yaml }}
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
+  when: cp_running_hosts|length == 0
+
+- name: 'Retrieve a valid bootstrap token'
+  import_tasks: bootstrap_token.yml
+
+- name: 'Create bootstrap token if no valid found'
+  command: kubeadm token create
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
+  when: valid_bootstrap_tokens|length == 0
+
+- name: 'Retrieve a valid bootstrap token'
+  import_tasks: bootstrap_token.yml
+  when: valid_bootstrap_tokens|length == 0
+
+# TODO: fix two following tasks to be more platform dependent
+- name: 'Install python-openssl'
+  package:
+    name: >-
+      {%- if ansible_python.version.major > 2 -%}
+         {{ python3_openssl }}
+      {%- else -%}
+         {{ python2_openssl }}
+      {%- endif -%}
+    state: present
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
+
+- name: 'Get info from ca'
+  openssl_certificate_info:
+    path: /etc/kubernetes/pki/ca.crt
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
+  register: ca_info
+
+- debug:
+    var: ca_info
+    verbosity: 1
+  run_once: true
+
+- name: 'List current nodes'
+  kubectl:
+    state: get
+    resource_type: nodes
+    kubeconfig: /etc/kubernetes/admin.conf
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
+  register: current_nodes
+
+- name: 'Compute list of "to-join" nodes'
+  set_fact:
+    to_join_cp: >-
+      {{ ansible_play_hosts|difference(
+        current_nodes["items"]|map(attribute="metadata.name")) }}
+    cert_encryption_key: >-
+      {{ lookup('password', '/dev/null  length=64 chars=hexdigits') }}
+  run_once: true
+
+- debug:
+    var: to_join_cp
+    verbosity: 1
+  run_once: true
+
+- name: 'Upload certificates if control-plane node need to be joined'
+  command: >-
+    kubeadm init phase upload-certs
+    --upload-certs
+    --certificate-key {{ cert_encryption_key }}
+  no_log: '{{ sensitive_debug|bool }}'
+  run_once: true
+  delegate_to: '{{ kubeadm_host }}'
+  when: to_join_cp|length > 0
