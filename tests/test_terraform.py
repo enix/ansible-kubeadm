@@ -6,7 +6,7 @@ import tftest
 
 @pytest.fixture
 def spawn():
-  tf = tftest.TerraformTest('terraform')
+  tf = tftest.TerraformTest(os.path.join(os.path.dirname(__file__), 'terraform'))
   tf.setup(cleanup_on_exit=False)
   tf.apply()
   yield tf.output()
@@ -15,7 +15,7 @@ def spawn():
 
 @pytest.fixture
 def inventory(spawn):
-    return '{}/terraform/{}'.format(os.getcwd(), spawn['inventory'])
+    return '{}/terraform/{}'.format(os.path.dirname(__file__), spawn['inventory'])
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def running_vm(inventory):
     fix_dns = ansible_runner.run(
         envvars={'ANSIBLE_HOST_KEY_CHECKING': 'false'},
         inventory=inventory,
-        playbook='{}/playbooks/fix-dns.yml'.format(os.getcwd()),
+        playbook=os.path.join(os.path.dirname(__file__), 'playbooks/fix-dns.yml')
     )
     assert fix_dns.status == 'successful'
 
@@ -38,7 +38,7 @@ def prepared_vm(inventory, running_vm):
     docker = ansible_runner.run(
         envvars={'ANSIBLE_HOST_KEY_CHECKING': 'false'},
         inventory=inventory,
-        playbook='{}/playbooks/docker.yml'.format(os.getcwd()),
+        playbook=os.path.join(os.path.dirname(__file__), 'playbooks/docker.yml')
     )
     assert docker.status == 'successful'
 
@@ -50,6 +50,6 @@ def test_install(inventory, prepared_vm):
             envvars={'ANSIBLE_HOST_KEY_CHECKING': 'false',
                  'ANSIBLE_FORCE_COLOR': 'true'},
             inventory=inventory,
-            playbook=os.path.join('{}/../playbooks/'.format(os.getcwd()), playbook)
+            playbook=os.path.join(os.path.dirname(__file__), '../playbooks/', playbook)
         )
         assert result.status == 'successful'

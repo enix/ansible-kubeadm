@@ -1,0 +1,5 @@
+---
+exclude_paths:
+  - ./tests/playbooks/roles
+skip_list:
+  - '301'
