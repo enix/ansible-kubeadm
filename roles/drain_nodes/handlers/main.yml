@@ -1,0 +1,8 @@
+---
+- name: 'uncordon node'
+  command: kubectl uncordon {{ ansible_nodename }}
+  retries: 4
+  register: uncordon_nodes
+  until: uncordon_nodes is not failed
+  delegate_to: '{{ cp_node }}'
+  when: drain_node|bool

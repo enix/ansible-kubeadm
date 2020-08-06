@@ -1,0 +1,9 @@
+---
+- name: 'Apply upgrade'
+  command: kubeadm upgrade node
+  register: upgrade_node
+
+- debug:
+    msg: >-
+      {{ dict(stderr=upgrade_node.stderr_lines,
+              stdout=upgrade_node.stdout_lines) }}
