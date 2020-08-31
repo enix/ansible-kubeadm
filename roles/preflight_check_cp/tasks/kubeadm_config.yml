@@ -1,21 +1,6 @@
 ---
-- name: 'Ensure kubectl is installed if running host found'
-  include_role:
-    name: packages
-  vars:
-    control_plane_pkgs: true  # kubectl
-    node_pkgs: false
-    kubeadm_pkgs: false
-    enforce_version: false
-  when: cp_running_hosts|length > 0
-
 - name: 'get kubeadm configmap if cluster running'
-  kubectl:
-    state: get
-    namespace: kube-system
-    resource_type: cm
-    name: kubeadm-config
-    kubeconfig: /etc/kubernetes/admin.conf
+  command: kubeadm config view
   run_once: true
   changed_when: false
   check_mode: false
@@ -46,7 +31,7 @@
       {%- if cp_running_hosts|length == 0 -%}
         {}
       {%- else -%}
-        {{ in_cluster_kubeadm_config.item.data.ClusterConfiguration|from_yaml }}
+        {{ in_cluster_kubeadm_config.stdout|from_yaml }}
       {%- endif -%}
 
 - debug:
