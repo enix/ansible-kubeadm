@@ -5,7 +5,7 @@ RUN apt-get update && \
 
 RUN pip install tox
 
-ARG TERRAFORM_VERSION=0.12.28
+ARG TERRAFORM_VERSION=0.13.2
 RUN curl -sSLo terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
  && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
