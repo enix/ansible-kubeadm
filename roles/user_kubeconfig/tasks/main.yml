@@ -1,0 +1,12 @@
+---
+- name: 'create .kube directory'
+  file: # noqa 208
+    dest: '~/.kube'
+    state: directory
+
+- name: 'copy admin kubeconfig for user'
+  copy: # noqa 208
+    remote_src: true
+    src: "/etc/kubernetes/admin.conf"
+    dest: "~/.kube/config"
+  when: user_has_kubeconfig|bool

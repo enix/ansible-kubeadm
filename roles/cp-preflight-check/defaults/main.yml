@@ -1,6 +1,0 @@
----
-debug: false
-
-apiserver_manifest: '/etc/kubernetes/manifests/kube-apiserver.yaml'
-
-kube_version: '1.17'

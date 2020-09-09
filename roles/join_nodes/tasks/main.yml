@@ -1,0 +1,50 @@
+---
+- name: 'Retrive variable from control-plane'
+  set_fact:
+    ca_info: '{{ cp_vars.ca_info }}'
+    valid_bootstrap_tokens: '{{ cp_vars.valid_bootstrap_tokens }}'
+    control_plane_endpoint: '{{ cp_vars.control_plane_endpoint }}'
+  vars:
+    cp_vars: '{{ hostvars[groups.kube_control_plane|first] }}'
+
+- name: 'List all node'
+  kubectl:
+    state: get
+    resource_type: nodes
+    kubeconfig: /etc/kubernetes/admin.conf
+  run_once: true
+  delegate_to: '{{ groups.kube_control_plane|first }}'
+  register: current_nodes
+
+- name: 'Display current node'
+  debug:
+    var: current_nodes
+    verbosity: 1
+
+- name: 'Display control_plane_endpoint'
+  debug:
+    var: control_plane_endpoint
+    verbosity: 1
+
+- name: 'Join node that are not already joined'
+  command: >-
+    kubeadm join
+    {% if control_plane_endpoint %}
+       {{ control_plane_endpoint }}
+    {% else %}
+       {{ hostvars[groups.kube_control_plane|first].ansible_default_ipv4.address }}:6443
+    {% endif %}
+    --token {{ token_data['token-id']|b64decode }}.{{ token_data['token-secret']|b64decode }}
+    --discovery-token-ca-cert-hash sha256:{{ ca_info.public_key_fingerprints.sha256.replace(':', '') }}
+    {% if control_plane %}
+    --control-plane --certificate-key {{ cert_encryption_key }}
+    {% endif %}
+  register: kubeadm_node_join
+  when: ansible_nodename not in nodes_list
+  vars:
+    nodes_list: '{{ current_nodes["items"]|map(attribute="metadata.name")|list }}'
+    token_data: '{{ (valid_bootstrap_tokens|first).data }}'
+
+- debug:
+    var: kubeadm_node_join
+    verbosity: 1

@@ -8,8 +8,11 @@ repository_dependencies:
   - ca-certificates
   - gnupg
 
-node_packages:
+kubeadm_packages:
   - kubeadm
+  - kubectl # As a dependency but without version specification
+
+node_packages:
   - kubelet
   - kubernetes-cni
 
