@@ -65,3 +65,28 @@
 
 - debug:
     var: target_kubeadm_version
+
+- name: 'Check that version upgrade is one step'
+  fail:
+    msg: 'Version upgrade is not allowed: {{ current_cp_version }} => {{ target_kube_version }}'
+  when:
+    - current_cp_version|length > 0
+    - (current_major != target_major) or (current_minor|int - target_minor|int)|abs > 1
+  vars:
+    current_version_split: '{{ (current_cp_version|regex_findall("(?:\d+)"))[0:2] }}'
+    current_major: '{{ current_version_split|first }}'
+    current_minor: '{{ current_version_split|last }}'
+    target_version_split: '{{ (target_kube_version|regex_findall("(?:\d+)"))[0:2] }}'
+    target_major: '{{ target_version_split|first }}'
+    target_minor: '{{ target_version_split|last }}'
+
+- name: 'Add controle to cp_upgrade, if upgrade needed'
+  add_host:
+    name: '{{ (cp_running_hosts|default([0], true))|first }}'
+    group: cp_upgrade
+  changed_when: false
+  check_mode: false
+  run_once: true
+  when:
+    - current_cp_version|length > 0
+    - not(current_cp_version|regex_search(target_kube_version ~ '.*'))

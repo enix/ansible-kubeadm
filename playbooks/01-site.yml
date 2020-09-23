@@ -7,6 +7,31 @@
   roles:
     - role: preflight_check_nodes
 
+# This has to be overly cautious on package upgade
+- hosts: cp_upgrade
+  gather_facts: false
+  roles:
+    - role: packages
+      vars:
+        node_pkgs: false
+    - role: upgrade_cp
+    - role: packages
+      vars:
+        node_pkgs: true
+
+- hosts: nodes_upgrade
+  serial: '{{ _upgrade_serial|default(1) }}'
+  gather_facts: false
+  roles:
+    - role: packages
+      vars:
+        node_pkgs: false
+    - role: upgrade_nodes
+    - role: packages
+      vars:
+        node_pkgs: true
+
+# After uprgade is done we can enforce all package version
 - hosts: kube_control_plane
   roles:
     - role: packages

@@ -10,7 +10,22 @@
   package_facts:
 
 - debug:
-    var: packages.kubelet
+    var: packages.kubectl
 
 - debug:
     var: target_kubeadm_version
+
+- name: 'Add to upgrade group if difference found'
+  add_host:
+    groups: nodes_upgrade
+    name: '{{ item }}'
+  run_once: true
+  check_mode: false
+  changed_when: false
+  # noqa 104
+  with_items: >-
+    [ {%- for host in ansible_play_hosts
+          if hostvars[host].packages.kubelet|default([])
+             |rejectattr('version', 'eq', target_kubeadm_version)|list|length > 0 -%}
+            '{{ host }}',
+      {%- endfor -%} ]

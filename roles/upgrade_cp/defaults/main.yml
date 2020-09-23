@@ -1,0 +1,4 @@
+---
+drain: true
+
+cp_node: '{{ groups.kube_control_plane|first }}'

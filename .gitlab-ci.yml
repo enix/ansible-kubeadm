@@ -18,7 +18,7 @@ ansible-lint:
   script:
     - tox -e tools -- ansible-lint
 
-openstack-tests:
+.openstack-test:
   stage: test
   image: docker-registry.enix.io/kubernetes/ansible-kubeadm/tooling:latest
   variables:
@@ -27,5 +27,13 @@ openstack-tests:
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.enix.io".insteadOf "ssh://git@gitlab.enix.io"
     - ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
     - tox -e tests --notest
+
+openstack-tests-everything:
+  extends: .openstack-test
   script:
-    - tox -e tests -- -s
+    - tox -e tests -- -s -k "not upgrade"
+
+openstack-tests-upgrade:
+  extends: .openstack-test
+  script:
+    - tox -e tests -- -s -k "upgrade"

@@ -13,7 +13,7 @@
       {%- endif -%}
       {{ cluster_config_orig|combine(cluster_config) }}
 
-- name: 'write kubeconfig if modification needed'
+- name: 'write kubeadm config if modification needed'
   copy:
     content: '{{ cluster_config_final|to_nice_yaml(indent=2) }}'
     dest: '{{ kubeadm_config_yaml }}'
