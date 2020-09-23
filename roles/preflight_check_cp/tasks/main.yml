@@ -14,7 +14,7 @@
   package_facts:
 
 - debug:
-    var: packages.kubeadm
+    var: packages
     verbosity: 1
 
 - name: 'Find node with manifests (more likely to be running)'
@@ -53,7 +53,7 @@
     _kubeadm_version: >-
       {%- set kubeadm_match = ansible_play_hosts
            |map('extract', hostvars, ['packages', 'kubeadm', 0, 'version'])
-           |select('match', _kube_version ~ '.*')|list -%}
+           |map('default')|select('match', _kube_version ~ '.*')|list -%}
       {%- if kubeadm_match|length > 0 -%}
         {{ kubeadm_match|first }}
       {%- else -%}
