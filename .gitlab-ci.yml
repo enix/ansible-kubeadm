@@ -28,12 +28,17 @@ ansible-lint:
     - ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
     - tox -e tests --notest
 
-openstack-tests-everything:
+openstack-tests-ansible-2.9:
   extends: .openstack-test
   script:
-    - tox -e tests -- -s -k "not upgrade"
+    - tox -e ansible-2.9 -- -s -k "not upgrade"
+
+openstack-tests-ansible-2.10:
+  extends: .openstack-test
+  script:
+    - tox -e ansible-2.10 -- -s -k "not upgrade"
 
 openstack-tests-upgrade:
   extends: .openstack-test
   script:
-    - tox -e tests -- -s -k "upgrade"
+    - tox -e ansible-2.10 -- -s -k "upgrade"
