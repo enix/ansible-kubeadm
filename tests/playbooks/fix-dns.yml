@@ -2,3 +2,7 @@
 - hosts: all
   roles:
     - role: fix-dns
+  tasks:
+    - name: 'prefetching repo cache'
+      apt:
+        cache_valid_time: 36600
