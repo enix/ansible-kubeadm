@@ -2,6 +2,9 @@
 - hosts: all
   roles:
     - role: fix-dns
+
+- hosts: all
+  gather_facts: false
   tasks:
     - name: 'prefetching repo cache'
       apt:
