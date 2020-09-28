@@ -63,7 +63,8 @@ def test_install(inventory, prepared_vm):
 
 def test_upgrade(inventory, prepared_vm):
     result = install(inventory)
-    ansible_runner.run(
+    assert result.status == 'successful'
+    result = ansible_runner.run(
         envvars={'ANSIBLE_HOST_KEY_CHECKING': 'false',
                  'ANSIBLE_FORCE_COLOR': 'true'},
         inventory=inventory,
@@ -71,4 +72,6 @@ def test_upgrade(inventory, prepared_vm):
         module_args='kubectl apply -f https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml',
         host_pattern='kube_control_plane[0]'
     )
+    assert result.status == 'successful'
     result = install(inventory, extravars={'kube_version': '1.18'})
+    assert result.status == 'successful'
