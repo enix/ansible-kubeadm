@@ -1,7 +1,0 @@
----
-- name: 'hold package'
-  dpkg_selections:
-    name: '{{ item }}'
-    selection: '{{ package_action }}'
-  # noqa 104
-  with_items: '{{ kube_package_dict.keys()|list }}'

@@ -68,24 +68,10 @@
   when: pause_before_kube_pkg_install|bool
 
 - name: 'Install kubernetes packages'
-  action: '{{ ansible_pkg_mgr }}'
-  args:
-    name: >-
-      [ {%- for pkg, version in kube_package_dict.items() -%}
-            "{{ pkg }}{{ version|ternary('=' ~ version, '') }}",
-        {%- endfor -%} ]
-    state: 'present'
-    force: '{{ (ansible_pkg_mgr == "apt")|ternary(true, omit) }}'
-    allow_downgrade: '{{ (ansible_pkg_mgr in ["yum", "dnf"])|ternary(true, omit) }}'
-
-- name: 'hold/lock kubernetes packages'
   include_tasks: '{{ file_tasks }}'
-  when: enforce_version|bool
   loop_control:
     loop_var: file_tasks
-  vars:
-    package_action: hold
   with_first_found:
-    - 'pkg_hold_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
-    - 'pkg_hold_{{ ansible_distribution }}.yml'
-    - 'pkg_hold_{{ ansible_os_family }}.yml'
+    - 'pkg_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'pkg_{{ ansible_distribution }}.yml'
+    - 'pkg_{{ ansible_os_family }}.yml'

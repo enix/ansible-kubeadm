@@ -13,10 +13,12 @@
   roles:
     - role: packages
       vars:
+        kubeadm_pkgs: true
         node_pkgs: false
     - role: upgrade_cp
     - role: packages
       vars:
+        kubeadm_pkgs: false
         node_pkgs: true
 
 - hosts: nodes_upgrade
@@ -25,10 +27,12 @@
   roles:
     - role: packages
       vars:
+        kubeadm_pkgs: true
         node_pkgs: false
     - role: upgrade_nodes
     - role: packages
       vars:
+        kubeadm_pkgs: false
         node_pkgs: true
 
 # After uprgade is done we can enforce all package version
