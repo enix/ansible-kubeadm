@@ -11,7 +11,7 @@
       {%- elif control_plane_endpoint -%}
          {%- set cluster_config = cluster_config|combine({'controlPlaneEndpoint': control_plane_endpoint}) -%}
       {%- endif -%}
-      {{ cluster_config_orig|combine(cluster_config) }}
+      {{ cluster_config_orig|combine(cluster_config, recursive=true) }}
 
 - name: 'write kubeadm config if modification needed'
   copy:
