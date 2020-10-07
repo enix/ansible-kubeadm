@@ -1,0 +1,39 @@
+---
+- name: 'List all nodes'
+  command: >-
+    kubectl get nodes -o yaml
+  changed_when: false
+  check_mode: false
+  register: all_nodes_cmd
+
+- debug:
+    var: all_nodes_cmd
+    verbosity: 1
+
+- name: 'Dispatch nodes in groups'
+  add_host:
+    name: '{{ item.metadata.name }}'
+    groups: >-
+      {%- set roles = item.metadata.labels
+        |select('match', 'node-role.kubernetes.io/.*')
+        |map('regex_replace', 'node-role.kubernetes.io/', '')|list -%}
+      {%- if 'master' in roles -%}
+        kube_control_plane
+      {%- else -%}
+        kube_workers
+      {%- endif -%}
+    ansible_host: >-
+      {{ (item.status.addresses
+          |selectattr('type', 'eq', 'InternalIP')
+          |first).address }}
+  loop_control:
+    label: '{{ item.metadata.name }}'
+  changed_when: false
+  check_mode: false
+  with_items: '{{ node_list }}'
+  vars:
+    node_list: '{{ (all_nodes_cmd.stdout|from_yaml)["items"] }}'
+
+- debug:
+    var: groups
+    verbosity: 1
