@@ -1,5 +1,14 @@
 ---
-- name: 'uncordon node'
+- name: 'Reboot node'
+  reboot:
+  when: reboot_node|bool
+
+- name: 'Wait for node'
+  wait_for_connection:
+  when: reboot_node|bool
+
+
+- name: 'Uncordon node'
   command: kubectl uncordon {{ ansible_nodename }}
   retries: 4
   register: uncordon_nodes

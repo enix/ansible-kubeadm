@@ -1,0 +1,14 @@
+---
+- hosts: '{{ _nodes_upgrade|default("nodes_upgrade") }}'
+  serial: '{{ _upgrade_serial|default(1) }}'
+  gather_facts: false
+  roles:
+    - role: packages
+      vars:
+        kubeadm_pkgs: true
+        node_pkgs: false
+    - role: upgrade_nodes
+    - role: packages
+      vars:
+        kubeadm_pkgs: false
+        node_pkgs: true

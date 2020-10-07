@@ -1,5 +1,6 @@
 ---
 drain_node: true
+reboot_node: false
 delete_local_data: false
 
 cp_node: '{{ groups.kube_control_plane|first }}'
