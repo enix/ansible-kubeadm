@@ -6,6 +6,11 @@
 - hosts: all
   gather_facts: false
   tasks:
+    - name: 'Lazy version of update cache'
+      apt:
+        update_cache: true
+        cache_valid_time: 366000
+        force_apt_get: true
     - name: 'prefetching repo cache'
       apt:
-        cache_valid_time: 36600
+        update_cache: true

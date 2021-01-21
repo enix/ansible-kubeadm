@@ -1,12 +1,14 @@
 ---
 - name: 'get kubeadm configmap if cluster running'
-  command: kubeadm config view
+  command: kubectl get cm -o jsonpath='{.data.ClusterConfiguration}' -n kube-system kubeadm-config
   run_once: true
   changed_when: false
   check_mode: false
   delegate_to: '{{ cp_running_hosts|first }}'
   register: in_cluster_kubeadm_config
   when: cp_running_hosts|length > 0
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
 
 - debug:
     var: in_cluster_kubeadm_config
