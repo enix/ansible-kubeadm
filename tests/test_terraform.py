@@ -10,7 +10,8 @@ def spawn():
     tf.setup(cleanup_on_exit=False)
     tf.apply()
     yield tf.output()
-    tf.destroy()
+    if os.environ.get('TERRAFORM_KEEP', 'false').lower() not in ['true', '1']:
+        tf.destroy()
 
 
 @pytest.fixture
@@ -56,22 +57,29 @@ def install(inventory, **kwargs):
     return result
 
 
+def kube_router(inventory, **kwargs):
+    return ansible_runner.run(
+        envvars={'ANSIBLE_HOST_KEY_CHECKING': 'false',
+                 'ANSIBLE_FORCE_COLOR': 'true'},
+        inventory=inventory,
+        module='command',
+        module_args='kubectl apply -f https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml',
+        host_pattern='kube_control_plane[0]',
+        **kwargs
+    )
+
+
 def test_install(inventory, prepared_vm):
-    result = install(inventory)
+    result = install(inventory, cmdline=os.environ.get('ANSIBLE_EXTRA_ARGS', None))
+    assert result.status == 'successful'
+    result = kube_router(inventory)
     assert result.status == 'successful'
 
 
 def test_upgrade(inventory, prepared_vm):
     result = install(inventory)
     assert result.status == 'successful'
-    result = ansible_runner.run(
-        envvars={'ANSIBLE_HOST_KEY_CHECKING': 'false',
-                 'ANSIBLE_FORCE_COLOR': 'true'},
-        inventory=inventory,
-        module='command',
-        module_args='kubectl apply -f https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml',
-        host_pattern='kube_control_plane[0]'
-    )
+    result = kube_router(inventory)
     assert result.status == 'successful'
     result = install(inventory, extravars={'kube_version': '1.18'})
     assert result.status == 'successful'

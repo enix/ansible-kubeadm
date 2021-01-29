@@ -3,6 +3,13 @@ stages:
   - pre-build
   - lint
   - test
+  - test-2
+  - test-3
+  - test-4
+
+variables:
+  FIRST_VERSION: '1.17'
+  LAST_VERSION: '1.20'
 
 include: .gitlab-ci/build-tooling-image.yml
 
@@ -25,20 +32,70 @@ ansible-lint:
     TF_VAR_stem: "${CI_JOB_ID}"
   before_script:
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.enix.io".insteadOf "ssh://git@gitlab.enix.io"
-    - ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
+    - "[ ! -f tests/ssh/id_rsa ] && mkdir -p tests/ssh/ && ssh-keygen -t rsa -b 2048 -N '' -f tests/ssh/id_rsa"
+    - ln -s ${CI_PROJECT_DIR}/tests/ssh ~/.ssh
     - tox -e tests --notest
 
 openstack-tests-ansible-2.9:
   extends: .openstack-test
   script:
-    - tox -e ansible-2.9 -- -s -k "not upgrade"
+    - tox -e ansible-2.9 -- -s
 
 openstack-tests-ansible-2.10:
   extends: .openstack-test
+  stage: test-2
   script:
-    - tox -e ansible-2.10 -- -s -k "not upgrade"
+    - tox -e ansible-2.10 -- -s
 
-openstack-tests-upgrade:
+.openstack-upgrade:
   extends: .openstack-test
+  variables:
+    TF_VAR_stem: "${CI_PIPELINE_ID}"
+    TERRAFORM_KEEP: "true"
+    ANSIBLE_EXTRA_ARGS: "-e kube_version=${FIRST_VERSION}"
   script:
-    - tox -e ansible-2.10 -- -s -k "upgrade"
+    - (cd tests/terraform; terraform plan -detailed-exitcode)
+    - tox -e tests -- -s -k "install"
+  artifacts:
+    paths:
+      - tests/
+
+install-1.17:
+  extends: .openstack-upgrade
+  variables:
+    ANSIBLE_EXTRA_ARGS: "-e kube_version=${FIRST_VERSION}"
+  script:
+    - tox -e tests -- -s -k "install"
+
+upgrade-1.18:
+  extends: .openstack-upgrade
+  stage: test-2
+  variables:
+    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.18"
+  dependencies:
+    - install-1.17
+
+upgrade-1.19:
+  extends: .openstack-upgrade
+  stage: test-3
+  variables:
+    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.19"
+  dependencies:
+    - upgrade-1.18
+
+upgrade-1.20:
+  extends: .openstack-upgrade
+  stage: test-4
+  variables:
+    ANSIBLE_EXTRA_ARGS: "-e kube_version=${LAST_VERSION}"
+  dependencies:
+    - upgrade-1.19
+
+cleanup:
+  extends: .openstack-upgrade
+  stage: .post
+  script:
+    - (cd tests/terraform; terraform destroy -auto-approve)
+  when: always
+  dependencies:
+    - install-1.17

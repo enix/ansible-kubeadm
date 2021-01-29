@@ -8,7 +8,7 @@ resource "openstack_compute_instance_v2" "workers" {
   image_name      = var.image_name
   flavor_name     = "GP1.S"
   key_pair        = openstack_compute_keypair_v2.ssh_deploy.name
-  security_groups = ["default", "${openstack_compute_secgroup_v2.kubeadm.name}"]
+  security_groups = ["default", openstack_compute_secgroup_v2.kubeadm.name]
 
   network {
     uuid = data.openstack_networking_network_v2.network.id
