@@ -72,24 +72,27 @@ upgrade-1.18:
   stage: test-2
   variables:
     ANSIBLE_EXTRA_ARGS: "-e kube_version=1.18"
-  dependencies:
-    - install-1.17
+  needs:
+    - job: install-1.17
+      artifacts: true
 
 upgrade-1.19:
   extends: .openstack-upgrade
   stage: test-3
   variables:
     ANSIBLE_EXTRA_ARGS: "-e kube_version=1.19"
-  dependencies:
-    - upgrade-1.18
+  needs:
+    - job: upgrade-1.18
+      artifacts: true
 
 upgrade-1.20:
   extends: .openstack-upgrade
   stage: test-4
   variables:
     ANSIBLE_EXTRA_ARGS: "-e kube_version=${LAST_VERSION}"
-  dependencies:
-    - upgrade-1.19
+  needs:
+    - job: upgrade-1.19
+      artifacts: true
 
 cleanup:
   extends: .openstack-upgrade
