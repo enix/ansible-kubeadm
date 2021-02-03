@@ -1,2 +1,1 @@
-provider "openstack" {
-}
+provider "openstack" {}
