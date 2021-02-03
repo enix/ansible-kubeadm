@@ -1,11 +1,32 @@
 ---
 - hosts: kube_control_plane
   roles:
+    - role: kubeadm_configs_compute
     - role: preflight_check_cp
 
 - hosts: kube_control_plane:kube_workers
   roles:
     - role: preflight_check_nodes
+
+- hosts: kube_control_plane
+  gather_facts: false
+  roles:
+    - role: kubeadm_configs_update
+
+- hosts: cp_init
+  gather_facts: false
+  roles:
+    - role: packages
+      vars:
+        control_plane_pkgs: true
+  tasks:
+    - name: 'Kubeadm init control init'
+      command: kubeadm init --config {{ kubeadm_config_yaml }}
+
+- hosts: kube_control_plane
+  gather_facts: false
+  roles:
+    - role: bootstrap_token
 
 # This has to be overly cautious on package upgade
 - hosts: cp_upgrade
@@ -23,19 +44,19 @@
 
 - include: 02-node-upgrade.yml
 
-# After uprgade is done we can enforce all package version
 - hosts: kube_control_plane
+  gather_facts: false
   roles:
     - role: packages
       vars:
         control_plane_pkgs: true
-    - role: control_plane_init
     - role: join_nodes
       vars:
         control_plane: true
     - role: user_kubeconfig
 
 - hosts: kube_workers
+  gather_facts: false
   roles:
     - role: packages
     - role: join_nodes

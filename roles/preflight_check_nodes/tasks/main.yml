@@ -1,5 +1,5 @@
 ---
-- name: 'Retrive variable from control-plane'
+- name: 'Retrieve variable from control-plane'
   set_fact:
     target_kube_version: '{{ cp_vars.target_kube_version }}'
     target_kubeadm_version: '{{ cp_vars.target_kubeadm_version }}'
@@ -15,6 +15,17 @@
 - debug:
     var: target_kubeadm_version
 
+- name: 'Test if local kubelet config exists'
+  stat:
+    path: '{{ kubelet_config_path }}'
+  register: kubelet_config_stat
+
+- name: 'Fetch local kubelet config if exist'
+  slurp:
+    path: '{{ kubelet_config_path }}'
+  register: kubelet_config_fetch
+  when: kubelet_config_stat.stat.exists
+
 - name: 'Add to upgrade group if difference found'
   add_host:
     groups: nodes_upgrade
@@ -23,9 +34,20 @@
   check_mode: false
   changed_when: false
   # noqa 104
-  with_items: >-
-    [ {%- for host in ansible_play_hosts
-          if hostvars[host].packages.kubelet|default([])
+  with_items: '{{ upgrade_nodes|unique }}'
+  vars:
+    upgrade_nodes: >-
+      [ {%- for host in ansible_play_hosts
+            if hostvars[host].packages.kubelet|default([])
              |rejectattr('version', 'eq', target_kubeadm_version)|list|length > 0 -%}
             '{{ host }}',
-      {%- endfor -%} ]
+        {%- endfor -%}
+        {%- for host in ansible_play_hosts -%}
+            {# "e30K" means "{}" in base64 #}
+            {%- set kubelet_config = kubelet_config_final|combine(
+                (hostvars[host].kubelet_config_fetch.content|default('e30K')|b64decode)|from_yaml,
+                recursive=true) -%}
+            {%- if kubelet_config != kubelet_config_final -%}
+              '{{ host }}',
+            {%- endif -%}
+        {%- endfor -%} ]

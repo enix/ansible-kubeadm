@@ -1,0 +1,21 @@
+---
+- name: 'Find if kube-apiserver manifest is present'
+  stat:
+    path: '{{ apiserver_manifest }}'
+  register: apiserver_manifest_stat
+
+- name: 'Find node with manifests (more likely to be running)'
+  add_host:
+    name: '{{ item }}'
+    group: 'cp_running'
+  changed_when: false
+  check_mode: false
+  run_once: true
+  with_items: >-
+    {{ ansible_play_hosts|zip(ansible_play_hosts
+         |map("extract", hostvars, ['apiserver_manifest_stat', 'stat', 'exists'])
+       )|selectattr('1')|map(attribute='0')|list }}
+
+- debug:
+    var: groups.cp_running
+    verbosity: 1

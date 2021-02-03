@@ -1,0 +1,8 @@
+---
+sensitive_debug: false
+cluster_config: {}
+
+kubeadm_config_yaml: '/tmp/kubeadm-config-{{ansible_date_time.iso8601 }}.yaml'
+
+python2_openssl: python-openssl
+python3_openssl: python3-openssl
