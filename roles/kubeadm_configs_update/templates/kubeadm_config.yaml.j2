@@ -1,0 +1,7 @@
+---
+{{ cluster_config_final|to_nice_yaml(indent=2) }}
+{% if kubelet_config_final != kubelet_config_orig
+  or groups.cp_running|default([])|length == 0 %}
+---
+{{ kubelet_config_final|to_nice_yaml(indent=2) }}
+{% endif %}

@@ -1,21 +1,7 @@
 ---
-- name: 'Assert required variable are here'
-  assert:
-    that:
-      - cp_running_hosts is defined
-
 - name: 'Select candidate host to run init'
   set_fact:
-    kubeadm_host: '{{ cp_running_hosts|default(ansible_play_hosts, true)|first }}'
-
-- name: 'Manage kubeadm config'
-  import_tasks: kubeadm_config.yml
-
-- name: 'Kubeadm init control init'
-  command: kubeadm init --config {{ kubeadm_config_yaml }}
-  run_once: true
-  delegate_to: '{{ kubeadm_host }}'
-  when: cp_running_hosts|length == 0
+    kubeadm_host: '{{ groups.cp_running|default(ansible_play_hosts, true)|first }}'
 
 - name: 'Retrieve a valid bootstrap token'
   import_tasks: bootstrap_token.yml
