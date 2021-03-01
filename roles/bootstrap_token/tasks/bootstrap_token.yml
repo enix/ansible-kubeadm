@@ -18,7 +18,10 @@
 
 - name: 'Filter expire token'
   set_fact:
-    valid_bootstrap_tokens: '{{ bootstrap_tokens["items"]|bootstrap_token_valid }}'
+    valid_bootstrap_tokens: >-
+      {{ bootstrap_tokens["items"]
+       |selectattr('data.usage-bootstrap-authentication', 'defined')
+       |bootstrap_token_valid }}
   run_once: true
 
 - name: 'Display valid bootstrap tokens'
