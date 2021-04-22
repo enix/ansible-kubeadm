@@ -10,7 +10,7 @@
     {{ kube_package_dict.keys()|intersect(packages.keys())|list }}
   when:
     - enforce_version|bool
-      # If any of the package is not install, unhold all packages to make install
+    # If any of the package is not install, unhold all packages to make install
     - kube_package_dict.keys()|map('extract', packages)|map('default')|reject|list|length > 1
       or
       current_version != target_version

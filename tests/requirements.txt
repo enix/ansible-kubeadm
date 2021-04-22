@@ -1,6 +1,8 @@
 ansible
+ansible-lint
 ansible-runner
 arrow
 pytest
 pytest-bdd
 tftest
+yamllint

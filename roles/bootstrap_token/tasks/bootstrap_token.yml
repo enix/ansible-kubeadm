@@ -10,7 +10,8 @@
   delegate_to: '{{ kubeadm_host }}'
   register: bootstrap_tokens
 
-- debug:
+- name: 'Display all bootstrap tokens'
+  debug:
     var: bootstrap_tokens
     verbosity: 1
   run_once: true
@@ -20,7 +21,8 @@
     valid_bootstrap_tokens: '{{ bootstrap_tokens["items"]|bootstrap_token_valid }}'
   run_once: true
 
-- debug:
+- name: 'Display valid bootstrap tokens'
+  debug:
     var: valid_bootstrap_tokens
     verbosity: 1
   run_once: true

@@ -10,7 +10,7 @@ repository_dependencies:
 
 kubeadm_packages:
   - kubeadm
-  - kubectl # As a dependency but without version specification
+  - kubectl  # As a dependency but without version specification
   - kubernetes-cni
 
 node_packages:

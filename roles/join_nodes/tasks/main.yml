@@ -45,6 +45,7 @@
     nodes_list: '{{ current_nodes["items"]|map(attribute="metadata.name")|list }}'
     token_data: '{{ (valid_bootstrap_tokens|first).data }}'
 
-- debug:
+- name: 'Display output of "kubeadm join"'
+  debug:
     var: kubeadm_node_join
     verbosity: 1

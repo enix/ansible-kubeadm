@@ -6,7 +6,8 @@
   check_mode: false
   register: all_nodes_cmd
 
-- debug:
+- name: 'Display output of "kubectl get nodes"'
+  debug:
     var: all_nodes_cmd
     verbosity: 1
 
@@ -34,6 +35,7 @@
   vars:
     node_list: '{{ (all_nodes_cmd.stdout|from_yaml)["items"] }}'
 
-- debug:
+- name: 'Display groups (displaying discovered nodes)'
+  debug:
     var: groups
     verbosity: 1

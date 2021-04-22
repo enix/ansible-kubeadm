@@ -2,7 +2,8 @@
 - name: 'Get version of kubeadm package'
   package_facts:
 
-- debug:
+- name: 'Display information about all packages'
+  debug:
     var: packages
     verbosity: 1
 
@@ -35,10 +36,12 @@
         {{ _kube_version }}
       {%- endif -%}
 
-- debug:
+- name: 'Display wanted version of kuberbenetes'
+  debug:
     var: target_kube_version
 
-- debug:
+- name: 'Display wanted version of kubeadm'
+  debug:
     var: target_kubeadm_version
 
 - name: 'Check that version upgrade is one step'

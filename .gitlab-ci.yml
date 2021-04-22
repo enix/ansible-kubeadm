@@ -52,7 +52,6 @@ openstack-tests-ansible-2.10:
   variables:
     TF_VAR_stem: "${CI_PIPELINE_ID}"
     TERRAFORM_KEEP: "true"
-    ANSIBLE_EXTRA_ARGS: "-e kube_version=${FIRST_VERSION}"
   script:
     - (cd tests/terraform; terraform plan -detailed-exitcode)
     - tox -e tests -- -s -k "install"

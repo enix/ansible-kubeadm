@@ -1,5 +1,7 @@
 ---
 exclude_paths:
-  - ./tests/playbooks/roles
+  - ./tests/playbooks/
+  - ./.gitlab-ci
 skip_list:
   - '301'
+  - no-handler

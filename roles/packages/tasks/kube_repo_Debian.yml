@@ -12,7 +12,7 @@
 
 - name: 'refresh source list'
   apt:
-    update_cache: yes
+    update_cache: true
   when: >-
     kube_repo_just_added is changed
     or force_apt_update|bool

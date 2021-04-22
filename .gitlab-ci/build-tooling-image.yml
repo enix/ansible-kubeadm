@@ -11,4 +11,3 @@ build-tooling-image:
     changes:
       - .gitlab-ci/tooling/*
       - .gitlab-ci/build-tooling-image.yml
-

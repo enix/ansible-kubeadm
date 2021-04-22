@@ -36,7 +36,8 @@
   delegate_to: '{{ kubeadm_host }}'
   register: ca_info
 
-- debug:
+- name: 'Display Kubernetes CA(cert) properties'
+  debug:
     var: ca_info
     verbosity: 1
   run_once: true
@@ -59,7 +60,8 @@
       {{ lookup('password', '/dev/null  length=64 chars=hexdigits') }}
   run_once: true
 
-- debug:
+- name: 'Display list of node that need to be joined'
+  debug:
     var: to_join_cp
     verbosity: 1
   run_once: true

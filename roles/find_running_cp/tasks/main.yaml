@@ -16,6 +16,7 @@
          |map("extract", hostvars, ['apiserver_manifest_stat', 'stat', 'exists'])
        )|selectattr('1')|map(attribute='0')|list }}
 
-- debug:
+- name: 'Display list of machine with a potentially running control-plane'
+  debug:
     var: groups.cp_running
     verbosity: 1
