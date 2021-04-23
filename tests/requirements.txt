@@ -2,6 +2,7 @@ ansible
 ansible-lint
 ansible-runner
 arrow
+python-openstackclient
 pytest
 pytest-bdd
 tftest
