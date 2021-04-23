@@ -39,13 +39,13 @@ ansible-lint:
 openstack-tests-ansible-2.9:
   extends: .openstack-test
   script:
-    - tox -e ansible-2.9 -- -s
+    - tox -e ansible-2.9 -- -s -k "install"
 
 openstack-tests-ansible-2.10:
   extends: .openstack-test
   stage: test-2
   script:
-    - tox -e ansible-2.10 -- -s
+    - tox -e ansible-2.10 -- -s -k "install"
 
 .openstack-upgrade:
   extends: .openstack-test
