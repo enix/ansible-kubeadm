@@ -9,10 +9,12 @@
 - name: 'Get version of kubelet package'
   package_facts:
 
-- debug:
+- name: 'Display info about kubectl'
+  debug:
     var: packages.kubectl
 
-- debug:
+- name: 'Display wanted version of kubeadm'
+  debug:
     var: target_kubeadm_version
 
 - name: 'Test if local kubelet config exists'

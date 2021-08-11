@@ -3,7 +3,8 @@
   command: kubeadm upgrade node
   register: upgrade_node
 
-- debug:
+- name: 'Display result of "kubeadm upgrade node"'
+  debug:
     msg: >-
       {{ dict(stderr=upgrade_node.stderr_lines,
               stdout=upgrade_node.stdout_lines) }}

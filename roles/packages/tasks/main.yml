@@ -31,7 +31,8 @@
   when: target_kubeadm_version is defined
   register: kubeadm_version
 
-- debug:
+- name: 'Display of complete version of kubeadm'
+  debug:
     var: kubeadm_version
     verbosity: 1
 

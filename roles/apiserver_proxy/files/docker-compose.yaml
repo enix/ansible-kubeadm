@@ -6,4 +6,4 @@ services:
     network_mode: host
     restart: always
     env_file:
-    - ./apiserver-proxy-endpoints.env
+      - ./apiserver-proxy-endpoints.env

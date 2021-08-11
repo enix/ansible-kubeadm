@@ -1,4 +1,5 @@
 import ansible_runner
+import logging
 import os
 import pytest
 import tftest
@@ -44,6 +45,22 @@ def prepared_vm(inventory, running_vm):
     assert docker.status == 'successful'
 
 
+def ansible_retry(count, func):
+    def wrapper(*args, **kwargs):
+        for counter in range(count, -1, -1):
+            try:
+                ansible_result = func(*args, **kwargs)
+                if ansible_result.status == 'successful':
+                    return ansible_result
+                continue
+            except Exception as exc:
+                logging.exception(str(exc))
+                if counter == 0:
+                    raise
+        return ansible_result
+    return wrapper
+
+
 def install(inventory, **kwargs):
     for playbook in ['00-apiserver-proxy.yml',
                      '01-site.yml']:
@@ -70,9 +87,9 @@ def kube_router(inventory, **kwargs):
 
 
 def test_install(inventory, prepared_vm):
-    result = install(inventory, cmdline=os.environ.get('ANSIBLE_EXTRA_ARGS', None))
+    result = ansible_retry(2, install)(inventory, cmdline=os.environ.get('ANSIBLE_EXTRA_ARGS', None))
     assert result.status == 'successful'
-    result = kube_router(inventory)
+    result = ansible_retry(1, kube_router)(inventory)
     assert result.status == 'successful'
 
 

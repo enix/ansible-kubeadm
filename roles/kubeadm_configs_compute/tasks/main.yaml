@@ -19,7 +19,8 @@
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
 
-- debug:
+- name: 'Display current kubeadm-config raw output'
+  debug:
     var: in_cluster_kubeadm_config
     verbosity: 1
   run_once: true
@@ -29,7 +30,7 @@
     cluster_config_orig: '{{ cluster_config_orig }}'
     current_cp_version: >-
       {{ cluster_config_orig.get("kubernetesVersion", "")
-      |regex_replace("v(.*)", "\g<1>")}}
+         |regex_replace("v(.*)", "\g<1>") }}
   run_once: true
   vars:
     cluster_config_orig: >-
@@ -39,7 +40,8 @@
         {{ in_cluster_kubeadm_config.stdout|from_yaml }}
       {%- endif -%}
 
-- debug:
+- name: 'Display current extracted ClusterConfig'
+  debug:
     var: cluster_config_orig
     verbosity: 1
   run_once: true
@@ -75,12 +77,14 @@
         {{ in_cluster_kubelet_config.stdout|from_yaml }}
       {%- endif -%}
 
-- debug:
+- name: 'Display computed "control_plane_endpoint'
+  debug:
     var: control_plane_endpoint
     verbosity: 1
   run_once: true
 
-- debug:
+- name: 'Display current Kubelet config'
+  debug:
     var: kubelet_config_orig
     verbosity: 1
   run_once: true
@@ -104,12 +108,14 @@
     kubelet_config_final: >-
       {{ kubelet_config_orig|default(default_kubelet_config, true)|combine(kubelet_config, recursive=true) }}
 
-- debug:
+- name: 'Display computed ClusterConfig'
+  debug:
     var: cluster_config_final
     verbosity: 1
   run_once: true
 
-- debug:
+- name: 'Display computed Kubelet config'
+  debug:
     var: kubelet_config_final
     verbosity: 1
   run_once: true

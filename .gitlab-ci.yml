@@ -39,23 +39,28 @@ ansible-lint:
 openstack-tests-ansible-2.9:
   extends: .openstack-test
   script:
-    - tox -e ansible-2.9 -- -s
+    - tox -e ansible-2.9 -- -s -k "install"
+  dependencies: []
 
 openstack-tests-ansible-2.10:
   extends: .openstack-test
   stage: test-2
   script:
-    - tox -e ansible-2.10 -- -s
+    - tox -e ansible-2.10 -- -s -k "install"
+  dependencies: []
 
 .openstack-upgrade:
   extends: .openstack-test
   variables:
     TF_VAR_stem: "${CI_PIPELINE_ID}"
     TERRAFORM_KEEP: "true"
-    ANSIBLE_EXTRA_ARGS: "-e kube_version=${FIRST_VERSION}"
   script:
+    - cat tests/terraform/terraform.tfstate || true
+    - tox -e tools -- openstack server list || true
     - (cd tests/terraform; terraform plan -detailed-exitcode)
     - tox -e tests -- -s -k "install"
+  after_script:
+    - tox -e tools -- openstack server list || true
   artifacts:
     paths:
       - tests/
@@ -94,11 +99,11 @@ upgrade-1.20:
     - job: upgrade-1.19
       artifacts: true
 
-cleanup:
-  extends: .openstack-upgrade
-  stage: .post
-  script:
-    - (cd tests/terraform; terraform destroy -auto-approve)
-  when: always
-  dependencies:
-    - install-1.17
+#cleanup:
+#  extends: .openstack-upgrade
+#  stage: .post
+#  script:
+#    - (cd tests/terraform; terraform destroy -auto-approve)
+#  when: always
+#  dependencies:
+#    - install-1.17

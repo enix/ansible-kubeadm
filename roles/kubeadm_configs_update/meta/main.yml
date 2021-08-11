@@ -7,10 +7,10 @@ galaxy_info:
   license: Apache
   min_ansible_version: 2.7
   platforms:
-  - name: Ubuntu
-    versions:
-      - 18.04
-      - 20.04
+    - name: Ubuntu
+      versions:
+        - 18.04
+        - 20.04
   galaxy_tags:
     - kubernetes
     - kubeadm

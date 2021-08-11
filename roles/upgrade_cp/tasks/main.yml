@@ -3,7 +3,8 @@
   command: kubeadm upgrade plan {{ kubeadm_version.version.split( '-' )|first }}
   register: plan_upgrade
 
-- debug:
+- name: 'Display result of "kubectl upgrade plan"'
+  debug:
     msg: >-
       {{ dict(stderr=plan_upgrade.stderr_lines,
               stdout=plan_upgrade.stdout_lines) }}
@@ -12,7 +13,8 @@
   command: kubeadm upgrade apply {{ kubeadm_version.version.split( '-' )|first }} -y
   register: apply_upgrade
 
-- debug:
+- name: 'Display result of "kubectl upgrade apply"'
+  debug:
     msg: >-
       {{ dict(stderr=apply_upgrade.stderr_lines,
               stdout=apply_upgrade.stdout_lines) }}
