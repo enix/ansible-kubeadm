@@ -17,6 +17,7 @@
   when: >-
     cluster_config_final != cluster_config_orig
     or kubelet_config_final != kubelet_config_orig
+    or kubeproxy_config_final != kubeproxy_config_orig
     or groups.cp_running|default([])|length == 0
 
 - name: 'reupload config if cluster running'

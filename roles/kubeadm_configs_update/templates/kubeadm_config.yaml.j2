@@ -5,3 +5,8 @@
 ---
 {{ kubelet_config_final|to_nice_yaml(indent=2) }}
 {% endif %}
+{% if kubeproxy_config_final != kubeproxy_config_orig
+  or groups.cp_running|default([])|length == 0 %}
+---
+{{ kubeproxy_config_final|to_nice_yaml(indent=2) }}
+{% endif %}
