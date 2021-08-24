@@ -112,7 +112,8 @@
     verbosity: 1
   run_once: true
 
-- debug: 'Display current KubeProxy config'
+- name: 'Display current KubeProxy config'
+  debug:
     var: kubeproxy_config_orig
     verbosity: 1
   run_once: true
