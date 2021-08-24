@@ -65,7 +65,7 @@
 - name: 'get kubeproxy configmap if cluster running'
   command: >-
     kubectl -n kube-system get cm
-    -o jsonpath='{.data}'
+    -o jsonpath='{.data.config\.conf}'
     kube-proxy
   run_once: true
   changed_when: false
