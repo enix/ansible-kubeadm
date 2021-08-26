@@ -20,10 +20,20 @@
     or kubeproxy_config_final != kubeproxy_config_orig
     or groups.cp_running|default([])|length == 0
 
-- name: 'reupload config if cluster running'
+- name: 'reupload KUBEADM/KUBELET config if cluster running'
   command: kubeadm init phase upload-config all --config {{ kubeadm_config_yaml }}
   run_once: true
   delegate_to: '{{ _kubeadm_host }}'
   when:
     - kubeadm_configs_write is changed
+    - cluster_config_final != cluster_config_orig or kubelet_config_final != kubelet_config_orig
+    - groups.cp_running|default([])|length > 0
+
+- name: 'reupload KUBEPROXY config if cluster running'
+  command: kubeadm init phase addon kube-proxy --config {{ kubeadm_config_yaml }}
+  run_once: true
+  delegate_to: '{{ _kubeadm_host }}'
+  when:
+    - kubeadm_configs_write is changed
+    - kubeproxy_config_final != kubeproxy_config_orig
     - groups.cp_running|default([])|length > 0
