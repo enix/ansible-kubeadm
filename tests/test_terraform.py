@@ -81,7 +81,7 @@ def kube_router(inventory, **kwargs):
         inventory=inventory,
         module='command',
         module_args='kubectl apply -f https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml',
-        host_pattern='kube_control_plane[0]',
+        host_pattern='{{ kube_cp_group|default("kube_control_plane") }}[0]',
         **kwargs
     )
 
@@ -89,7 +89,7 @@ def kube_router(inventory, **kwargs):
 def test_install(inventory, prepared_vm):
     result = ansible_retry(2, install)(inventory, cmdline=os.environ.get('ANSIBLE_EXTRA_ARGS', None))
     assert result.status == 'successful'
-    result = ansible_retry(1, kube_router)(inventory)
+    result = ansible_retry(1, kube_router)(inventory, cmdline=os.environ.get('ANSIBLE_EXTRA_ARGS', None))
     assert result.status == 'successful'
 
 

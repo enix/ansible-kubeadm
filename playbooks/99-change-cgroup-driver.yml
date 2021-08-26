@@ -10,7 +10,7 @@
 # 2/ Modify kube-system/kubelet-config-1.x configmap to change "cgroupDriver" to the value "systemd"
 
 
-- hosts: 'kube_control_plane:kube_workers'
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
   serial: '{{ _upgrade_serial|default(1) }}'
   vars:
     reboot_node: true
@@ -29,7 +29,7 @@
 
     - name: 'taint node'
       command: kubectl taint node {{ inventory_hostname }} foo=bar:NoExecute --overwrite=true
-      delegate_to: '{{ groups.kube_control_plane|first }}'
+      delegate_to: '{{ groups[kube_cp_group]|first }}'
   roles:
     - role: drain_nodes
   tasks:
@@ -81,4 +81,4 @@
 
     - name: 'untaint node'
       command: kubectl taint node {{ inventory_hostname }} foo:NoExecute-
-      delegate_to: '{{ groups.kube_control_plane|first }}'
+      delegate_to: '{{ groups[kube_cp_group]|first }}'

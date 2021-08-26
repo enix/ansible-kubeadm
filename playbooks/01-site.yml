@@ -1,14 +1,14 @@
 ---
-- hosts: kube_control_plane
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   roles:
     - role: kubeadm_configs_compute
     - role: preflight_check_cp
 
-- hosts: kube_control_plane:kube_workers
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
   roles:
     - role: preflight_check_nodes
 
-- hosts: kube_control_plane
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   gather_facts: false
   roles:
     - role: kubeadm_configs_update
@@ -23,7 +23,7 @@
     - name: 'Kubeadm init control init'
       command: kubeadm init --config {{ kubeadm_config_yaml }}
 
-- hosts: kube_control_plane
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   gather_facts: false
   roles:
     - role: bootstrap_token
@@ -44,7 +44,7 @@
 
 - include: 02-node-upgrade.yml
 
-- hosts: kube_control_plane
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   gather_facts: false
   roles:
     - role: packages
@@ -55,7 +55,7 @@
         control_plane: true
     - role: user_kubeconfig
 
-- hosts: kube_workers
+- hosts: '{{ kube_worker_group|default("kube_workers") }}'
   gather_facts: false
   roles:
     - role: packages
