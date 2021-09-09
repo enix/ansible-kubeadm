@@ -1,6 +1,7 @@
 ---
 dependencies:
   - role: kubectl_module
+  - role: common_vars
 galaxy_info:
   author: Julien Girardin
   description: Join node to a kubernetes cluster

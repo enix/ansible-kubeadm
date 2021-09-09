@@ -1,5 +1,6 @@
 ---
-dependencies: []
+dependencies:
+  - role: common_vars
 galaxy_info:
   author: Julien Girardin
   description: Install an internal loadbalancer for kube-apiserver

@@ -5,7 +5,7 @@
     valid_bootstrap_tokens: '{{ cp_vars.valid_bootstrap_tokens }}'
     control_plane_endpoint: '{{ cp_vars.control_plane_endpoint }}'
   vars:
-    cp_vars: '{{ hostvars[groups.kube_control_plane|first] }}'
+    cp_vars: '{{ hostvars[cp_node] }}'
 
 - name: 'List all node'
   kubectl:
@@ -13,7 +13,7 @@
     resource_type: nodes
     kubeconfig: /etc/kubernetes/admin.conf
   run_once: true
-  delegate_to: '{{ groups.kube_control_plane|first }}'
+  delegate_to: '{{ cp_node }}'
   register: current_nodes
 
 - name: 'Display current node'
@@ -32,7 +32,7 @@
     {% if control_plane_endpoint %}
        {{ control_plane_endpoint }}
     {% else %}
-       {{ hostvars[groups.kube_control_plane|first].ansible_default_ipv4.address }}:6443
+       {{ hostvars[cp_node].ansible_default_ipv4.address }}:6443
     {% endif %}
     --token {{ token_data['token-id']|b64decode }}.{{ token_data['token-secret']|b64decode }}
     --discovery-token-ca-cert-hash sha256:{{ ca_info.public_key_fingerprints.sha256.replace(':', '') }}

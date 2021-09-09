@@ -2,7 +2,7 @@
 dependencies: []
 galaxy_info:
   author: Julien Girardin
-  description: Retrieve vars from control-plane
+  description: Common variable for ansible-kubeadm roles
   company: Enix
   license: Apache
   min_ansible_version: 2.7
