@@ -2,4 +2,4 @@
 kube_cp_group: kube_control_plane
 kube_worker_group: kube_workers
 
-cp_node: '{{ groups[kube_cp_group]|first }}'
+cp_node: '{{ groups.cp_running|first }}'
