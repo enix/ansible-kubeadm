@@ -1,10 +1,8 @@
 ---
 - name: 'Retrieve variable from control-plane'
   set_fact:
-    target_kube_version: '{{ cp_vars.target_kube_version }}'
-    target_kubeadm_version: '{{ cp_vars.target_kubeadm_version }}'
-  vars:
-    cp_vars: '{{ hostvars[cp_node] }}'
+    target_kube_version: '{{ hostvars[cp_node].target_kube_version }}'
+    target_kubeadm_version: '{{ hostvars[cp_node].target_kubeadm_version }}'
 
 - name: 'Get version of kubelet package'
   package_facts:
