@@ -1,11 +1,9 @@
 ---
 - name: 'Retrive variable from control-plane'
   set_fact:
-    ca_info: '{{ cp_vars.ca_info }}'
-    valid_bootstrap_tokens: '{{ cp_vars.valid_bootstrap_tokens }}'
-    control_plane_endpoint: '{{ cp_vars.control_plane_endpoint }}'
-  vars:
-    cp_vars: '{{ hostvars[cp_node] }}'
+    ca_info: '{{ hostvars[cp_node].ca_info }}'
+    valid_bootstrap_tokens: '{{ hostvars[cp_node].valid_bootstrap_tokens }}'
+    control_plane_endpoint: '{{ hostvars[cp_node].control_plane_endpoint }}'
 
 - name: 'List all node'
   kubectl:
