@@ -1,0 +1,84 @@
+---
+# Before running this playbook, please:
+# 1/ Adjust kube-proxy taint to NOT tolerate "foo" taint
+#    Don't forget to at least tolerate master or you will loose service connectivity on master nodes
+#    ```
+#    - effect: NoSchedule
+#      key: node-role.kubernetes.io/master
+#    ```
+#
+# 2/ Modify kube-system/kubelet-config-1.x configmap to change "cgroupDriver" to the value "systemd"
+
+
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  serial: '{{ _upgrade_serial|default(1) }}'
+  vars:
+    reboot_node: true
+    delete_local_data: true
+  pre_tasks:
+
+    - name: 'create backup dir'
+      command: mkdir -p /etc/kubernetes/manifests_backup/  # noqa 302
+      args:
+        removes: /etc/kubernetes/manifests/kube-apiserver.yaml
+
+    - name: 'move static file'
+      shell: mv /etc/kubernetes/manifests/* /etc/kubernetes/manifests_backup/
+      args:
+        removes: /etc/kubernetes/manifests/kube-apiserver.yaml
+
+    - name: 'taint node'
+      command: kubectl taint node {{ inventory_hostname }} foo=bar:NoExecute --overwrite=true
+      delegate_to: '{{ groups[kube_cp_group]|first }}'
+  roles:
+    - role: drain_nodes
+  tasks:
+    - name: 'verify docker list'
+      command: docker ps -q
+      register: docker_ps
+      check_mode: false
+      changed_when: false
+      failed_when: docker_ps.stdout|length != 0
+      retries: 30
+      until: docker_ps is not failed
+
+    - name: 'upgrade kubelet config'
+      command: kubeadm upgrade node
+
+    - name: 'stop kubelet'
+      service:
+        name: kubelet
+        state: stopped
+
+    - name: 'get /etc/docker/daemon.json'
+      slurp:
+        src: /etc/docker/daemon.json
+      register: docker_daemon_json
+
+    - name: 'add croup-driver'
+      copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {{ daemon_json|to_nice_json(indent=2) }}
+        mode: 0644
+        owner: root
+        group: root
+      vars:
+        daemon_json: >-
+          {%- set daemon_json = docker_daemon_json.content|b64decode|from_json -%}
+          {%- set _ = daemon_json.update({
+               "exec-opts": ["native.cgroupdriver=systemd"]
+          }) -%}
+          {{ daemon_json }}
+
+    - name: 'remove old pods informations'
+      shell: rm -rf /var/lib/kubelet/pods/*  # noqa 302
+
+    - name: 'move back static pods to run when kubelet will restart'
+      shell: mv /etc/kubernetes/manifests_backup/* /etc/kubernetes/manifests/
+      args:
+        removes: /etc/kubernetes/manifests_backup
+
+    - name: 'untaint node'
+      command: kubectl taint node {{ inventory_hostname }} foo:NoExecute-
+      delegate_to: '{{ groups[kube_cp_group]|first }}'

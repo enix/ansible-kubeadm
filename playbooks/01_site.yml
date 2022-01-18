@@ -1,0 +1,62 @@
+---
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  roles:
+    - role: kubeadm_configs_compute
+    - role: preflight_check_cp
+
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  roles:
+    - role: preflight_check_nodes
+
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  gather_facts: false
+  roles:
+    - role: kubeadm_configs_update
+
+- hosts: cp_init
+  gather_facts: false
+  roles:
+    - role: packages
+      vars:
+        control_plane_pkgs: true
+  tasks:
+    - name: 'Kubeadm init control init'
+      command: kubeadm init --config {{ kubeadm_config_yaml }}
+
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  gather_facts: false
+  roles:
+    - role: bootstrap_token
+
+# This has to be overly cautious on package upgade
+- hosts: cp_upgrade
+  gather_facts: false
+  roles:
+    - role: packages
+      vars:
+        kubeadm_pkgs: true
+        node_pkgs: false
+    - role: upgrade_cp
+    - role: packages
+      vars:
+        kubeadm_pkgs: false
+        node_pkgs: true
+
+- import_playbook: 02_node_upgrade.yml
+
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  gather_facts: false
+  roles:
+    - role: packages
+      vars:
+        control_plane_pkgs: true
+    - role: join_nodes
+      vars:
+        control_plane: true
+    - role: user_kubeconfig
+
+- hosts: '{{ kube_worker_group|default("kube_workers") }}'
+  gather_facts: false
+  roles:
+    - role: packages
+    - role: join_nodes
