@@ -1,5 +1,1 @@
----
-- hosts: all
-  gather_facts: false
-  roles:
-    - role: discover
+00_inventory.yml

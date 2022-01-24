@@ -85,7 +85,7 @@ upgrade-1.19:
   extends: .openstack-upgrade
   stage: test-3
   variables:
-    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.19"
+    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.19.15"
   needs:
     - job: upgrade-1.18
       artifacts: true
