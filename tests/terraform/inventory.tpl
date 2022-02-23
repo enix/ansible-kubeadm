@@ -12,6 +12,9 @@ ${server} ansible_host=${ip}
 control_plane_endpoint=127.0.0.1:7443
 cluster_config={"networking": {"podSubnet": "10.253.0.0/11"}}
 kubelet_config={"cgroupDriver": "systemd"}
+%{ if allocate_private_net == true ~}
+kubelet_node_ip_cidr="${private_subnet}"
+%{ endif ~}
 ansible_user=ubuntu
 ansible_become=true
 ansible_ssh_pipelining=True

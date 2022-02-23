@@ -1,0 +1,19 @@
+---
+- name: "Find node related IP"
+  import_role:
+    name: find_ip
+  vars:
+    is_control_plane: true
+
+- name: "Compute init-config"
+  set_fact:
+    _init_config: '{{ lookup("template", role_path ~ "/templates/init_config.j2") | from_yaml }}'
+
+- name: "Write kubeadm config"
+  import_role:
+    name: kubeadm_configs_update
+  vars:
+    init_config: '{{ _init_config }}'
+
+- name: 'Kubeadm init control init'
+  command: kubeadm init --config {{ kubeadm_config_yaml }}

@@ -8,20 +8,18 @@
   roles:
     - role: preflight_check_nodes
 
-- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
-  gather_facts: false
-  roles:
-    - role: kubeadm_configs_update
-
 - hosts: cp_init
   gather_facts: false
   roles:
     - role: packages
       vars:
         control_plane_pkgs: true
-  tasks:
-    - name: 'Kubeadm init control init'
-      command: kubeadm init --config {{ kubeadm_config_yaml }}
+    - role: init_cp
+
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  gather_facts: false
+  roles:
+    - role: kubeadm_configs_update
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   gather_facts: false

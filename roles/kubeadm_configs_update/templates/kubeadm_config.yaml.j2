@@ -10,3 +10,7 @@
 ---
 {{ kubeproxy_config_final|to_nice_yaml(indent=2) }}
 {% endif %}
+{% if init_config != {} %}
+---
+{{ init_config|to_nice_yaml(indent=2) }}
+{% endif %}
