@@ -1,0 +1,12 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+{% if kube_apiserver_advertise_address is defined %}
+localAPIEndpoint:
+  advertiseAddress: "{{ kube_apiserver_advertise_address.ipv4.address }}"
+{% endif %}
+{% if kubelet_node_ip is defined %}
+nodeRegistration:
+  kubeletExtraArgs:
+    node-ip: {{ kubelet_node_ip.ipv4.address }}
+{% endif %}

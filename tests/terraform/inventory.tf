@@ -8,6 +8,8 @@ resource "local_file" "inventory" {
       openstack_compute_instance_v2.workers.*.name,
       openstack_networking_floatingip_v2.floatip_workers.*.address
     )
+    allocate_private_net = var.allocate_private_net
+    private_subnet       = var.private_subnet
   })
   filename = "${var.stem}-hosts.cfg"
 }

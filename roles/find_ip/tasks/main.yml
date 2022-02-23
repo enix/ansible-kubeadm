@@ -1,0 +1,44 @@
+---
+- name: 'Find kube_apiserver_advertise_address'
+  set_fact:
+    kube_apiserver_advertise_address: >-
+      {%- if _matched_iface|length == 1 -%}
+        {{ _matched_iface|first }}
+      {%- elif _matched_iface|length == 0 -%}
+        {{ _error|mandatory('No matched found for kube_apiserver_advertise_address') }}
+      {%- else -%}
+        {{ _error|mandatory('Multiple match for kube_apiserver_advertise_address') }}
+      {%- endif -%}
+  when:
+    - kube_apiserver_advertise_cidr|length > 0
+    - is_control_plane|bool
+  vars:
+    _matched_iface: >-
+      [ {%- for iface_name in ansible_interfaces -%}
+          {%- set iface = vars["ansible_" ~ iface_name] -%}
+          {%- if kubeadm_api_advertise_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
+            {{ iface }},
+          {%- endif -%}
+        {%- endfor -%} ]
+
+- name: 'Find kubelet_node_ip'
+  set_fact:
+    kubelet_node_ip: >-
+      {%- if _matched_iface|length == 1 -%}
+        {{ _matched_iface|first }}
+      {%- elif _matched_iface|length == 0 -%}
+        {{ _error|mandatory('No matched found for kubelet_node_ip') }}
+      {%- else -%}
+        {{ _error|mandatory('Multiple match for kubelet_node_ip') }}
+      {%- endif -%}
+  when:
+    - kubelet_node_ip_cidr|length > 0
+    - skip_node_ip|bool
+  vars:
+    _matched_iface: >-
+      [ {%- for iface_name in ansible_interfaces -%}
+          {%- set iface = vars["ansible_" ~ iface_name] -%}
+          {%- if kubelet_node_ip_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
+            {{ iface }},
+          {%- endif -%}
+        {%- endfor -%} ]

@@ -1,9 +1,15 @@
 ---
-- name: 'Retrive variable from control-plane'
+- name: 'Retrieve variable from control-plane'
   set_fact:
     ca_info: '{{ hostvars[cp_node].ca_info }}'
     valid_bootstrap_tokens: '{{ hostvars[cp_node].valid_bootstrap_tokens }}'
     control_plane_endpoint: '{{ hostvars[cp_node].control_plane_endpoint }}'
+
+- name: "Find node related IP"
+  import_role:
+    name: find_ip
+  vars:
+    is_controle_plane: '{{ control_plane }}'
 
 - name: 'List all node'
   kubectl:
@@ -19,29 +25,19 @@
     var: current_nodes
     verbosity: 1
 
-- name: 'Display control_plane_endpoint'
+- name: 'Display JoinConfig'
   debug:
-    var: control_plane_endpoint
+    msg: '{{ lookup("template", role_path ~ "/templates/join_config.j2").splitlines() }}'
     verbosity: 1
 
 - name: 'Join node that are not already joined'
-  command: >-
-    kubeadm join
-    {% if control_plane_endpoint %}
-       {{ control_plane_endpoint }}
-    {% else %}
-       {{ hostvars[cp_node].ansible_default_ipv4.address }}:6443
-    {% endif %}
-    --token {{ token_data['token-id']|b64decode }}.{{ token_data['token-secret']|b64decode }}
-    --discovery-token-ca-cert-hash sha256:{{ ca_info.public_key_fingerprints.sha256.replace(':', '') }}
-    {% if control_plane %}
-    --control-plane --certificate-key {{ cert_encryption_key }}
-    {% endif %}
+  command: kubeadm join --config=/dev/stdin
+  args:
+    stdin: '{{ lookup("template", role_path ~ "/templates/join_config.j2") }}'
   register: kubeadm_node_join
   when: ansible_nodename not in nodes_list
   vars:
     nodes_list: '{{ current_nodes["items"]|map(attribute="metadata.name")|list }}'
-    token_data: '{{ (valid_bootstrap_tokens|first).data }}'
 
 - name: 'Display output of "kubeadm join"'
   debug:

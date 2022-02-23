@@ -25,3 +25,11 @@ variable "ssh_key_path" {
 variable "stem" {
   default = "kubeadm"
 }
+
+variable "allocate_private_net" {
+  default = true
+}
+
+variable "private_subnet" {
+  default = "192.168.199.0/24"
+}

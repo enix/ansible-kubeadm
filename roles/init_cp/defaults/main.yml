@@ -1,0 +1,3 @@
+---
+kubeadm_api_advertise_cidr: ''
+kubeadm_node_ip_cidr: ''
