@@ -42,9 +42,11 @@ openstack-tests-ansible-2.9:
     - tox -e ansible-2.9 -- -s -k "install"
   dependencies: []
 
-openstack-tests-ansible-2.10:
+openstack-tests-ansible-2.10-without-private-iface:
   extends: .openstack-test
   stage: test-2
+  variables:
+    TF_VAR_allocate_private_net: "false"
   script:
     - tox -e ansible-2.10 -- -s -k "install"
   dependencies: []
