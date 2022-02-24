@@ -64,6 +64,7 @@ openstack-tests-ansible-2.10-without-private-iface:
   after_script:
     - tox -e tools -- openstack server list || true
   artifacts:
+    when: always
     paths:
       - tests/
 
