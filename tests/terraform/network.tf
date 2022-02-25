@@ -27,3 +27,24 @@ resource "openstack_compute_secgroup_v2" "kubeadm" {
     self        = true
   }
 }
+
+resource "openstack_networking_network_v2" "private_net" {
+  name        = var.stem
+  description = "private network"
+  count       = var.allocate_private_net == true ? 1 : 0
+}
+
+resource "openstack_networking_subnet_v2" "private_subnet" {
+  name       = var.stem
+  network_id = openstack_networking_network_v2.private_net[0].id
+  cidr       = var.private_subnet
+  ip_version = 4
+  count      = var.allocate_private_net == true ? 1 : 0
+}
+
+locals {
+  network_id_list = compact([
+    data.openstack_networking_network_v2.network.id,
+    var.allocate_private_net == true ? openstack_networking_network_v2.private_net[0].id : null
+  ])
+}

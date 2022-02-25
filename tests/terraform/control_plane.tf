@@ -10,8 +10,11 @@ resource "openstack_compute_instance_v2" "control_plane" {
   key_pair        = openstack_compute_keypair_v2.ssh_deploy.name
   security_groups = ["default", openstack_compute_secgroup_v2.kubeadm.name]
 
-  network {
-    uuid = data.openstack_networking_network_v2.network.id
+  dynamic "network" {
+    for_each = local.network_id_list
+    content {
+      uuid = network.value
+    }
   }
 
   scheduler_hints {
@@ -37,4 +40,3 @@ resource "openstack_compute_floatingip_associate_v2" "cp_pub_ip" {
 
   count = var.control_plane_count
 }
-
