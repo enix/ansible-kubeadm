@@ -19,9 +19,14 @@
 - name: 'Filter expire token'
   set_fact:
     valid_bootstrap_tokens: >-
-      {{ bootstrap_tokens["items"]
-       |selectattr('data.usage-bootstrap-authentication', 'defined')
-       |bootstrap_token_valid }}
+      {%- if 'bootstrap_token_valid' is filter -%}
+        {%- set filter_name = "bootstrap_token_valid" -%}
+      {%- else -%}
+        {%- set filter_name = "enix.kubeadm.bootstrap_token_valid" -%}
+      {%- endif -%}
+      {{ [bootstrap_tokens["items"]
+         |selectattr('data.usage-bootstrap-authentication', 'defined')|list]
+         |map(filter_name)|first }}
   run_once: true
 
 - name: 'Display valid bootstrap tokens'
