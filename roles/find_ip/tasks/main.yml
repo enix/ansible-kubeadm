@@ -2,24 +2,24 @@
 - name: 'Find kube_apiserver_advertise_address'
   set_fact:
     kube_apiserver_advertise_address: >-
-      {%- if _matched_iface|length == 1 -%}
-        {{ _matched_iface|first }}
-      {%- elif _matched_iface|length == 0 -%}
+      {%- if matched_iface|length == 1 -%}
+        {{ matched_iface|first }}
+      {%- elif matched_iface|length == 0 -%}
         {{ _error|mandatory('No matched found for kube_apiserver_advertise_address') }}
       {%- else -%}
-        {{ _error|mandatory('Multiple match for kube_apiserver_advertise_address') }}
+        {{ _error|mandatory('Multiple match for kube_apiserver_advertise_address: ' + matched_iface) }}
       {%- endif -%}
   when:
     - kube_apiserver_advertise_cidr|length > 0
     - is_control_plane|bool
   vars:
-    _matched_iface: >-
+    matched_iface: >-
       [ {%- for iface_name in ansible_interfaces -%}
-          {%- set iface = vars["ansible_" ~ iface_name] -%}
-          {%- if kube_apiserver_advertise_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
-            {{ iface }},
-          {%- endif -%}
-        {%- endfor -%} ]
+          {%- set iface = hostvars[inventory_hostname]["ansible_" ~ iface_name] -%}
+          {%- if iface.ipv4 is defined and kube_apiserver_advertise_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
+             {{ iface }},
+        {%- endif -%}
+      {%- endfor -%} ]
 
 - name: 'Find kubelet_node_ip'
   set_fact:
@@ -38,7 +38,7 @@
     _matched_iface: >-
       [ {%- for iface_name in ansible_interfaces -%}
           {%- set iface = vars["ansible_" ~ iface_name] -%}
-          {%- if kubelet_node_ip_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
+          {%- if iface.ipv4 is defined and kubelet_node_ip_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
             {{ iface }},
           {%- endif -%}
         {%- endfor -%} ]
