@@ -5,3 +5,4 @@ exclude_paths:
 skip_list:
   - '301'
   - no-handler
+  - 'fqcn-builtins'
