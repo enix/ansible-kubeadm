@@ -3,10 +3,12 @@
   serial: '{{ _upgrade_serial|default(1) }}'
   gather_facts: false
   roles:
+    - role: find_ip
     - role: packages
       vars:
         kubeadm_pkgs: true
         node_pkgs: false
+    - role: control_plane_patches
     - role: upgrade_nodes
     - role: packages
       vars:

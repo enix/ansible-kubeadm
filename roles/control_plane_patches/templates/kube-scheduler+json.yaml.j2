@@ -1,0 +1,9 @@
+- op: add
+  path: /spec/containers/0/command/-
+  value: --bind-address={{ _kube_scheduler_bind_address.ipv4.address }}
+- op: replace
+  path: /spec/containers/0/livenessProbe/httpGet/host
+  value: {{ _kube_scheduler_bind_address.ipv4.address }}
+- op: replace
+  path: /spec/containers/0/startupProbe/httpGet/host
+  value: {{ _kube_scheduler_bind_address.ipv4.address }}

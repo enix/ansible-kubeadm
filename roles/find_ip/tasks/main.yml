@@ -1,44 +1,40 @@
 ---
 - name: 'Find kube_apiserver_advertise_address'
-  set_fact:
-    kube_apiserver_advertise_address: >-
-      {%- if matched_iface|length == 1 -%}
-        {{ matched_iface|first }}
-      {%- elif matched_iface|length == 0 -%}
-        {{ _error|mandatory('No matched found for kube_apiserver_advertise_address') }}
-      {%- else -%}
-        {{ _error|mandatory('Multiple match for kube_apiserver_advertise_address: ' + matched_iface) }}
-      {%- endif -%}
+  import_tasks: find_ip.yml
   when:
-    - kube_apiserver_advertise_cidr|length > 0
-    - is_control_plane|bool
+    - _control_plane|bool
   vars:
-    matched_iface: >-
-      [ {%- for iface_name in ansible_interfaces -%}
-          {%- set iface = hostvars[inventory_hostname]["ansible_" ~ iface_name] -%}
-          {%- if iface.ipv4 is defined and kube_apiserver_advertise_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
-             {{ iface }},
-        {%- endif -%}
-      {%- endfor -%} ]
+    found_address_var: "_kube_apiserver_advertise_address"
+    network_cidr: "{{ kube_apiserver_advertise_cidr|default(kube_control_plane_cidr, true) }}"
+
+- name: 'Find etcd_metrics_bind_address'
+  import_tasks: find_ip.yml
+  when:
+    - _control_plane|bool
+  vars:
+    found_address_var: "_etcd_metrics_bind_address"
+    network_cidr: "{{ etcd_metrics_bind_cidr|default(kube_control_plane_cidr, true) }}"
+
+- name: 'Find kube_controller_manager_bind_address'
+  import_tasks: find_ip.yml
+  when:
+    - _control_plane|bool
+  vars:
+    found_address_var: "_kube_controller_manager_bind_address"
+    network_cidr: "{{ kube_controller_manager_bind_cidr|default(kube_control_plane_cidr, true) }}"
+
+- name: 'Find kube_scheduler_bind_address'
+  import_tasks: find_ip.yml
+  when:
+    - _control_plane|bool
+  vars:
+    found_address_var: "_kube_scheduler_bind_address"
+    network_cidr: "{{ kube_scheduler_bind_cidr|default(kube_control_plane_cidr, true) }}"
 
 - name: 'Find kubelet_node_ip'
-  set_fact:
-    kubelet_node_ip: >-
-      {%- if _matched_iface|length == 1 -%}
-        {{ _matched_iface|first }}
-      {%- elif _matched_iface|length == 0 -%}
-        {{ _error|mandatory('No matched found for kubelet_node_ip') }}
-      {%- else -%}
-        {{ _error|mandatory('Multiple match for kubelet_node_ip') }}
-      {%- endif -%}
+  import_tasks: find_ip.yml
   when:
-    - kubelet_node_ip_cidr|length > 0
-    - not skip_node_ip|bool
+    - not _skip_node_ip|bool
   vars:
-    _matched_iface: >-
-      [ {%- for iface_name in ansible_interfaces -%}
-          {%- set iface = vars["ansible_" ~ iface_name] -%}
-          {%- if iface.ipv4 is defined and kubelet_node_ip_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
-            {{ iface }},
-          {%- endif -%}
-        {%- endfor -%} ]
+    found_address_var: "_kubelet_node_ip"
+    network_cidr: "{{ kubelet_node_ip_cidr }}"

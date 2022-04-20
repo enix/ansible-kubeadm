@@ -1,0 +1,22 @@
+---
+- name: 'Find {{ found_address_var }}'
+  set_fact:
+    "{{ found_address_var }}": >-
+      {%- if matched_iface|length == 1 -%}
+        {{ matched_iface|first }}
+      {%- elif matched_iface|length == 0 -%}
+        {{ _error|mandatory('No matched found for ' ~ found_address_var) }}
+      {%- else -%}
+        {{ _error|mandatory('Multiple match for ' ~ found_address_var ~ ': ' + matched_iface) }}
+      {%- endif -%}
+  when:
+    - network_cidr is defined
+    - network_cidr|length > 0
+  vars:
+    matched_iface: >-
+      [ {%- for iface_name in ansible_interfaces -%}
+          {%- set iface = hostvars[inventory_hostname]["ansible_" ~ iface_name] -%}
+          {%- if iface.ipv4 is defined and network_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
+             {{ iface }},
+        {%- endif -%}
+      {%- endfor -%} ]

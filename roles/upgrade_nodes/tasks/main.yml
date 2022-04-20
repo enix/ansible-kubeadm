@@ -1,6 +1,15 @@
 ---
 - name: 'Apply upgrade'
-  command: kubeadm upgrade node
+  command: >-
+    kubeadm upgrade node
+    {% if _control_plane and enable_kubeadm_patches|bool -%}
+      {% if target_kube_version is version("1.22", ">=") -%}
+      --patches
+      {%- else -%}
+      --experimental-patches
+      {%- endif %}
+      {{ kubeadm_patch_dir }}
+    {%- endif -%}
   register: upgrade_node
 
 - name: 'Display result of "kubeadm upgrade node"'

@@ -8,8 +8,8 @@ stages:
   - test-4
 
 variables:
-  FIRST_VERSION: '1.17'
-  LAST_VERSION: '1.20'
+  FIRST_VERSION: '1.19'
+  LAST_VERSION: '1.22'
 
 include: .gitlab-ci/build-tooling-image.yml
 
@@ -69,38 +69,38 @@ openstack-tests-ansible-2.10-without-private-iface:
     paths:
       - tests/
 
-install-1.17:
+install-1.19:
   extends: .openstack-upgrade
   variables:
     ANSIBLE_EXTRA_ARGS: "-e kube_version=${FIRST_VERSION}"
   script:
     - tox -e tests -- -s -k "install"
 
-upgrade-1.18:
+upgrade-1.20:
   extends: .openstack-upgrade
   stage: test-2
   variables:
-    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.18"
+    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.20"
   needs:
-    - job: install-1.17
+    - job: install-1.19
       artifacts: true
 
-upgrade-1.19:
+upgrade-1.21:
   extends: .openstack-upgrade
   stage: test-3
   variables:
-    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.19.15"
+    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.21"
   needs:
-    - job: upgrade-1.18
+    - job: upgrade-1.20
       artifacts: true
 
-upgrade-1.20:
+upgrade-1.22:
   extends: .openstack-upgrade
   stage: test-4
   variables:
     ANSIBLE_EXTRA_ARGS: "-e kube_version=${LAST_VERSION}"
   needs:
-    - job: upgrade-1.19
+    - job: upgrade-1.21
       artifacts: true
 
 cleanup:
@@ -110,4 +110,4 @@ cleanup:
     - (cd tests/terraform; terraform destroy -auto-approve)
   when: always
   dependencies:
-    - install-1.17
+    - install-1.19

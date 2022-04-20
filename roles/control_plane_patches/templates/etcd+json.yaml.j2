@@ -1,0 +1,9 @@
+- op: add
+  path: /spec/containers/0/command/-
+  value: --listen-metrics-urls=http://{{ _etcd_metrics_bind_address.ipv4.address }}:2381
+- op: replace
+  path: /spec/containers/0/livenessProbe/httpGet/host
+  value: {{ _etcd_metrics_bind_address.ipv4.address }}
+- op: replace
+  path: /spec/containers/0/startupProbe/httpGet/host
+  value: {{ _etcd_metrics_bind_address.ipv4.address }}

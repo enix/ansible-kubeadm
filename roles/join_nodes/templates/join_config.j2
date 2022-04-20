@@ -12,16 +12,16 @@ discovery:
 {% else %}
     apiServerEndpoint: "{{ hostvars[cp_node].ansible_default_ipv4.address }}:6443"
 {% endif %}
-{% if kubelet_node_ip is defined %}
+{% if _kubelet_node_ip is defined %}
 nodeRegistration:
   kubeletExtraArgs:
-    node-ip: "{{ kubelet_node_ip.ipv4.address }}"
+    node-ip: "{{ _kubelet_node_ip.ipv4.address }}"
 {% endif %}
-{% if control_plane %}
+{% if _control_plane %}
 controlPlane:
   certificateKey: "{{ cert_encryption_key }}"
-{% if kube_apiserver_advertise_address is defined %}
+{% if _kube_apiserver_advertise_address is defined %}
   localAPIEndpoint:
-    advertiseAddress: "{{ kube_apiserver_advertise_address.ipv4.address }}"
+    advertiseAddress: "{{ _kube_apiserver_advertise_address.ipv4.address }}"
 {% endif %}
 {% endif %}

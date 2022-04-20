@@ -4,4 +4,4 @@ debug: false
 apiserver_manifest: '/etc/kubernetes/manifests/kube-apiserver.yaml'
 
 kube_version:
-default_kube_version: '1.17'
+default_kube_version: '1.19'
