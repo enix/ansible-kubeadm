@@ -1,3 +1,9 @@
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  vars:
+    _control_plane: true
+  roles:
+    - role: find_ip
+
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
   roles:
     - role: apiserver_proxy
