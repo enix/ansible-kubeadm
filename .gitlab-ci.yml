@@ -41,6 +41,7 @@ openstack-tests-ansible-2.9:
   script:
     - tox -e ansible-2.9 -- -s -k "install"
   dependencies: []
+  allow_failure: true
 
 openstack-tests-ansible-2.10-without-private-iface:
   extends: .openstack-test
