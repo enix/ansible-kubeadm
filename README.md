@@ -2,43 +2,31 @@
 
 Aims to manage kubeadm based cluster via ansible
 
-Should be done before:
+What ansible-kubeadm can do:
+  - Install kubeadm on a variety of linux distribution
+  - lock kubeadm package to avoid upgrade
+  - init a cluster and join node in a idempotent manner
+  - upgrade a cluster in an indempotent maner (just add +1 to minor version config and your good to go !)
+
+What ansible-kubeadm expect to be done and will not do:
   - Upgrading distro
+  - Upgrade the kernel
   - install ntp
   - installing docker (or whatever CRI)
   - disable swap
   - remove unattented-upgrade
+  - configure CNI
 
-## How-To
+## Quickstart
 
-### Prepare inventory
+see [Quickstart](docs/quickstart.md) 
 
-create an inventory like this
+## Configuration
 
-```
-[kube_control_plane]
-kubeadm-cp-01   ansible_host=ip-cp1
-kubeadm-cp-02   ansible_host=ip-cp2
-kubeadm-cp-03   ansible_host=ip-cp3
+If you want a customized (ansible-)kubeadm experience there is a number of variables you can use: 
 
-[kube_nodes]
-kubeadm-node-01 ansible_host=ip-no1
-# ... more nodes
+[Variables reference](docs/variables.md)
 
-[all:vars]
-ansible_user=ubuntu
-ansible_become=true
-```
+## Tips and Tricks
 
-### Install ansible-kubeadm
-
-THIS IS NOT YET SUPPORTED BY ANSIBLE ([merged in ansible 2.10](https://github.com/ansible/ansible/pull/69154))
-```
-ansible-galaxy collection install git+ssh://git@gitlab.enix.io/kubernetes/ansible-kubeadm
-```
-
-### Run
-
-```
-ansible-playbook -i hosts ansible-kubeadm/playbooks/00-site.yaml
-```
+[Tips&Tricks](tips_tricks.md)
