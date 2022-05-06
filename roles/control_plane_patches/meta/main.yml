@@ -1,10 +1,9 @@
 ---
 dependencies:
   - role: common_vars
-  - role: drain_nodes
 galaxy_info:
   author: Julien Girardin
-  description: Manage kubernetes upgrade via kubeadm
+  description: Deploy patches for kubeadm to apply
   company: Enix
   license: Apache
   min_ansible_version: 2.7

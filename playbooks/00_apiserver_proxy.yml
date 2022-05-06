@@ -1,6 +1,6 @@
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   vars:
-    is_control_plane: true
+    _control_plane: true
   roles:
     - role: find_ip
 

@@ -1,7 +1,8 @@
 ---
+_control_plane: false
+
 kubeadm_pkgs: true
 node_pkgs: true
-control_plane_pkgs: false
 
 enforce_version: true
 

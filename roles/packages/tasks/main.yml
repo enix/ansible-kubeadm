@@ -55,7 +55,7 @@
       {%- if node_pkgs|bool -%}
         {%- set _ = pkg_list.extend(node_packages) -%}
       {%- endif -%}
-      {%- if control_plane_pkgs|bool -%}
+      {%- if _control_plane|bool -%}
         {%- set _ = pkg_list.extend(control_plane_packages) -%}
       {%- endif -%}
       {{ pkg_list|unique }}

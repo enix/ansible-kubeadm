@@ -1,0 +1,10 @@
+---
+kubeadm_patch_dir: /etc/kubernetes/patches
+kubeadm_patch_owner: root
+kubeadm_patch_group: root
+kubeadm_patch_mode: '0750'
+kubeadm_patch_dir_owner: '{{ kubeadm_patch_owner }}'
+kubeadm_patch_dir_group: '{{ kubeadm_patch_group }}'
+kubeadm_patch_dir_mode: '0750'
+
+kubeadm_extra_patches: {}

@@ -1,0 +1,53 @@
+---
+- name: 'Create patch directory'
+  file:
+    name: '{{ kubeadm_patch_dir }}'
+    state: directory
+    owner: '{{ kubeadm_patch_dir_owner }}'
+    group: '{{ kubeadm_patch_dir_group }}'
+    mode: '{{ kubeadm_patch_dir_mode }}'
+
+- name: 'Deploy patches'
+  template:
+    src: '{{ item.value }}'
+    dest: '{{ kubeadm_patch_dir }}/{{ item.key.rstrip(".j2") }}'
+    owner: '{{ kubeadm_patch_owner }}'
+    group: '{{ kubeadm_patch_group }}'
+    mode: '{{ kubeadm_patch_mode }}'
+  with_dict: '{{ kubeadm_default_patches|combine(kubeadm_extra_patches) }}'
+  register: kubeadm_deployed_patches
+  vars:
+    kubeadm_default_patches: >-
+      { {%- if _kube_controller_manager_bind_address is defined -%}
+            'kube-controller-manager+json.yaml.j2': 'kube-controller-manager+json.yaml.j2',
+        {%- endif -%}
+        {%- if _kube_scheduler_bind_address is defined -%}
+            'kube-scheduler+json.yaml.j2': 'kube-scheduler+json.yaml.j2',
+        {%- endif -%}
+        {%- if _etcd_metrics_bind_address is defined -%}
+            'etcd+json.yaml.j2': 'etcd+json.yaml.j2',
+        {%- endif -%}
+      }
+
+- name: 'Listing patches'
+  find:
+    paths: '{{ kubeadm_patch_dir }}'
+    recurse: false
+  register: kubeadm_current_patches
+
+- name: 'Remove uneeded patches'
+  file:
+    path: '{{ item }}'
+    state: 'absent'
+  register: kubeadm_removed_patches
+  with_items: >-
+    {{ kubeadm_current_patches.files|map(attribute="path")|list
+        |difference(kubeadm_deployed_patches.results|map(attribute="dest")|list) }}
+
+- name: 'Add to upgrade group if difference found'
+  add_host:
+    groups: nodes_upgrade
+    name: '{{ inventory_hostname }}'
+  check_mode: false
+  changed_when: false
+  when: kubeadm_deployed_patches is changed or kubeadm_removed_patches is changed

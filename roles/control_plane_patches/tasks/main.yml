@@ -1,0 +1,3 @@
+---
+- import_tasks: patch.yml
+  when: enable_kubeadm_patches|bool
