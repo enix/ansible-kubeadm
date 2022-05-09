@@ -47,7 +47,10 @@
 - name: 'Add to upgrade group if difference found'
   add_host:
     groups: nodes_upgrade
-    name: '{{ inventory_hostname }}'
+    name: '{{ item }}'
+  with_items: '{{ ansible_play_batch }}'
   check_mode: false
   changed_when: false
-  when: kubeadm_deployed_patches is changed or kubeadm_removed_patches is changed
+  when: >-
+    hostvars[item].kubeadm_deployed_patches is changed or
+    hostvars[item].kubeadm_removed_patches is changed
