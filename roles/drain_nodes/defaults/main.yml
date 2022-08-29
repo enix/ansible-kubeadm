@@ -1,4 +1,5 @@
 ---
 drain_node: true
 reboot_node: false
+delete_emptydir_data: false
 delete_local_data: false
