@@ -1,4 +1,8 @@
 ---
+- name: 'Pause after drain'
+  pause:
+  when: pause_after_drain|bool
+
 - name: 'Reboot node'
   reboot:
   when: reboot_node|bool

@@ -10,6 +10,7 @@
   delegate_to: '{{ cp_node }}'
   when: drain_node|bool
   notify:
+  - Pause after drain
   - Reboot node
   - Wait for node
   - Uncordon node
