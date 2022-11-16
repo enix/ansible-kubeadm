@@ -6,6 +6,9 @@
     {% if delete_local_data|bool %}
     --delete-local-data
     {% endif %}
+    {% if drain_force|bool %}
+    --force
+    {% endif %}
     {{ ansible_nodename }}
   delegate_to: '{{ cp_node }}'
   when: drain_node|bool
