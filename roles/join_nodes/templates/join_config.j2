@@ -1,6 +1,10 @@
 {%- set token_data = (valid_bootstrap_tokens|first).data -%}
 ---
+{% if target_kube_version is version("1.22", ">=") -%}
+apiVersion: kubeadm.k8s.io/v1beta3
+{% else %}
 apiVersion: kubeadm.k8s.io/v1beta2
+{% endif %}
 kind: JoinConfiguration
 discovery:
   bootstrapToken:
@@ -25,3 +29,7 @@ controlPlane:
     advertiseAddress: "{{ _kube_apiserver_advertise_address.ipv4.address }}"
 {% endif %}
 {% endif %}
+{% if _control_plane and enable_kubeadm_patches|bool and target_kube_version is version("1.22", ">=") -%}
+patches:
+  directory: {{ kubeadm_patch_dir }}
+{%- endif %}

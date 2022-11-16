@@ -1,5 +1,9 @@
 ---
+{% if target_kube_version is version("1.22", ">=") -%}
+apiVersion: kubeadm.k8s.io/v1beta3
+{% else %}
 apiVersion: kubeadm.k8s.io/v1beta2
+{% endif %}
 kind: InitConfiguration
 {% if _kube_apiserver_advertise_address is defined %}
 localAPIEndpoint:
@@ -10,3 +14,7 @@ nodeRegistration:
   kubeletExtraArgs:
     node-ip: {{ _kubelet_node_ip.ipv4.address }}
 {% endif %}
+{% if enable_kubeadm_patches and target_kube_version is version("1.22", ">=") -%}
+patches:
+  directory: {{ kubeadm_patch_dir }}
+{%- endif %}

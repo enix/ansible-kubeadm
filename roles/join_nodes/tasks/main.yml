@@ -34,11 +34,9 @@
     kubeadm join --config=/dev/stdin
     {% if _control_plane and enable_kubeadm_patches|bool -%}
       {% if target_kube_version is version("1.22", ">=") -%}
-      --patches
-      {%- else -%}
-      --experimental-patches
+      {% elif target_kube_version is version("1.19", ">=") -%}
+      --experimental-patches {{ kubeadm_patch_dir }}
       {%- endif %}
-      {{ kubeadm_patch_dir }}
     {%- endif -%}
   args:
     stdin: '{{ lookup("template", role_path ~ "/templates/join_config.j2") }}'

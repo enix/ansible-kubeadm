@@ -14,9 +14,7 @@
     kubeadm init --config {{ kubeadm_config_yaml }}
     {% if enable_kubeadm_patches -%}
       {% if target_kube_version is version("1.22", ">=") -%}
-      --patches
-      {%- else -%}
-      --experimental-patches
+      {% elif target_kube_version is version("1.19", ">=") -%}
+      --experimental-patches {{ kubeadm_patch_dir }}
       {%- endif %}
-      {{ kubeadm_patch_dir }}
     {% endif %}
