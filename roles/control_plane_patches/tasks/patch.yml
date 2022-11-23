@@ -51,6 +51,8 @@
   with_items: '{{ ansible_play_batch }}'
   check_mode: false
   changed_when: false
-  when: >-
-    hostvars[item].kubeadm_deployed_patches is changed or
-    hostvars[item].kubeadm_removed_patches is changed
+  when:
+    - >-
+      hostvars[item].kubeadm_deployed_patches is changed or
+      hostvars[item].kubeadm_removed_patches is changed
+    - groups.cp_running|default([])|length > 0
