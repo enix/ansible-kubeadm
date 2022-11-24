@@ -49,6 +49,13 @@
     state: present
   when: >-
     not(compose_installed is changed and ansible_check_mode)
+  vars:
+    ansible_python_interpreter: >-
+      {%- if ansible_distribution == "Ubuntu" and ansible_distribution_version == "18.04" -%}
+        /usr/bin/python2
+      {%- else -%}
+        {{ ansible_python.executable }}
+      {%- endif -%}
 
 - name: 'export vars'
   set_fact:
