@@ -46,7 +46,24 @@
     verbosity: 1
   run_once: true
 
-- name: 'get kubelet configmap if cluster running'
+- name: 'Get unversioned kubelet configmap if cluster running'
+  command: >-
+    kubectl -n kube-system get cm
+    --ignore-not-found=true
+    -o jsonpath='{.data.kubelet}'
+    kubelet-config
+  run_once: true
+  changed_when: false
+  check_mode: false
+  delegate_to: '{{ groups.cp_running|first }}'
+  register: in_cluster_kubelet_config_unversioned
+  when:
+    - found_kubectl.rc == 0
+    - groups.cp_running|default([])|length > 0
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: 'Get versioned kubelet configmap if cluster running'
   command: >-
     kubectl -n kube-system get cm
     -o jsonpath='{.data.kubelet}'
@@ -55,12 +72,23 @@
   changed_when: false
   check_mode: false
   delegate_to: '{{ groups.cp_running|first }}'
-  register: in_cluster_kubelet_config
+  register: in_cluster_kubelet_config_versioned
   when:
     - found_kubectl.rc == 0
     - groups.cp_running|default([])|length > 0
+    - in_cluster_kubelet_config_unversioned.stdout|length == 0
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: 'Get kubelet configmap if cluster running'
+  run_once: true
+  set_fact:
+    in_cluster_kubelet_config: >-
+      {%- if in_cluster_kubelet_config_unversioned.stdout|default("")|length > 0 -%}
+        {{ in_cluster_kubelet_config_unversioned }}
+      {%- else -%}
+        {{ in_cluster_kubelet_config_versioned }}
+      {%- endif -%}
 
 - name: 'get kubeproxy configmap if cluster running'
   command: >-

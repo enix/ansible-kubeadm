@@ -3,12 +3,14 @@
   command: >-
     kubeadm upgrade node
     {% if _control_plane and enable_kubeadm_patches|bool -%}
-      {% if target_kube_version is version("1.22", ">=") -%}
-      --patches
-      {%- else -%}
-      --experimental-patches
+      {% if target_kube_version is version("1.23", "<") -%}
+        {% if target_kube_version is version("1.22", ">=") -%}
+        --patches
+        {%- else -%}
+        --experimental-patches
+        {%- endif %}
+        {{ kubeadm_patch_dir }}
       {%- endif %}
-      {{ kubeadm_patch_dir }}
     {%- endif -%}
   register: upgrade_node
 
