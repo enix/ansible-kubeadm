@@ -1,4 +1,9 @@
+{%- if valid_bootstrap_tokens|length == 0 -%}
+{#- Use a dummy token for dry-run if it didn't exist -#}
+{%- set token_data = {"token-id": "ZHJ5LXJ1biB0b2tlbi1pZAo=", "token-secret": "ZHJ5LXJ1biB0b2tlbi1zZWNyZXQK"} -%}
+{%- else -%}
 {%- set token_data = (valid_bootstrap_tokens|first).data -%}
+{%- endif -%}
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: JoinConfiguration
