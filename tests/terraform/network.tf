@@ -39,6 +39,7 @@ resource "openstack_networking_subnet_v2" "private_subnet" {
   network_id = openstack_networking_network_v2.private_net[0].id
   cidr       = var.private_subnet
   ip_version = 4
+  no_gateway = true
   count      = var.allocate_private_net == true ? 1 : 0
 }
 

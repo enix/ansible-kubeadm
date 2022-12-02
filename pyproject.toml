@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "ansible-kubeadm"
+version = "0.1.0"
+description = "Aims to manage kubeadm based cluster via ansible"
+authors = ["Enix Dev <dev.enix.fr>"]
+include = ['roles', 'playbooks', 'plugins']
+
+[tool.poetry.dependencies]
+python = "^3.10"
+netaddr = "^0.8.0"
+
+[tool.poetry.dev-dependencies]
+python-openstackclient = "^5.8.0"
+yamllint = "^1.27.1"
+arrow = "^1.2.2"
+tftest = "^1.7.0"
+
+[tool.poetry.group.dev.dependencies]
+dagger-io = "^0.2.1"
+anyio = "^3.6.2"
+pytest-anyio = "^0.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
