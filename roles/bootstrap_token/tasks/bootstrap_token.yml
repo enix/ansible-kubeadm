@@ -20,9 +20,9 @@
   set_fact:
     valid_bootstrap_tokens: >-
       {%- if ansible_collection_name is defined -%}
-        {%- set filter_name = "bootstrap_token_valid" -%}
-      {%- else -%}
         {%- set filter_name = "enix.kubeadm.bootstrap_token_valid" -%}
+      {%- else -%}
+        {%- set filter_name = "bootstrap_token_valid" -%}
       {%- endif -%}
       {{ [bootstrap_tokens["items"]
          |selectattr('data.usage-bootstrap-authentication', 'defined')|list]
