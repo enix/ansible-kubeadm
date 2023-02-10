@@ -35,6 +35,7 @@
             "{{ pkg }}{{ version|ternary('=' ~ version, '') }}",
         {%- endfor -%} ]
     state: 'present'
+    allow_change_held_packages: "{{ ansible_check_mode }}"
 
 - name: 'hold package'
   dpkg_selections:
