@@ -24,3 +24,4 @@
   apt:
     name: "{{ kube_package_dict.keys() }}"
     state: "latest"
+    allow_change_held_packages: "{{ ansible_check_mode if ansible_version.string is version('2.13', '>=') else omit }}"
