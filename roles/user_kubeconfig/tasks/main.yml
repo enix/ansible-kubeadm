@@ -7,6 +7,7 @@
 - name: 'copy admin kubeconfig for user'
   copy:  # noqa 208
     remote_src: true
+    mode: preserve
     src: "/etc/kubernetes/admin.conf"
     dest: "~/.kube/config"
   when: user_has_kubeconfig|bool
