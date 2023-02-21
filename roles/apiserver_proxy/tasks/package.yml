@@ -1,0 +1,25 @@
+---
+- name: 'Add HAProxy repository'
+  include_tasks: '{{ item }}'
+  with_first_found:
+    - 'haproxy_repo_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'haproxy_repo_{{ ansible_distribution }}.yml'
+    - 'haproxy_repo_{{ ansible_os_family }}.yml'
+
+- name: 'Install HAProxy package'
+  include_tasks: '{{ file_tasks }}'
+  loop_control:
+    loop_var: file_tasks
+  with_first_found:
+    - 'pkg_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'pkg_{{ ansible_distribution }}.yml'
+    - 'pkg_{{ ansible_os_family }}.yml'
+
+- name: 'Template HAProxy config'
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    owner: haproxy
+    group: haproxy
+    mode: 0600
+  notify: 'Reload HAProxy'
