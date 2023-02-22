@@ -1,0 +1,19 @@
+---
+- name: 'Add HAProxy repo signing key'
+  apt_key:
+    url: 'https://haproxy.debian.net/bernat.debian.org.gpg'
+    state: present
+
+- name: 'Add the HAProxy repository'
+  apt_repository:
+    repo: 'deb http://haproxy.debian.net bullseye-backports-{{ _apiserver_proxy_haproxy_version | regex_replace("^(\d+[.]\d+)[.].+", "\1") }} main'
+    filename: haproxy
+    state: present
+  register: haproxy_repo_just_added
+
+- name: 'refresh source list'
+  apt:
+    update_cache: true
+  when: >-
+    haproxy_repo_just_added is changed
+    or force_apt_update|bool

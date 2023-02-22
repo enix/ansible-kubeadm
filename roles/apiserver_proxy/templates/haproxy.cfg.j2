@@ -1,0 +1,35 @@
+global
+    nbthread 1
+    maxconn 10000
+
+defaults
+    mode tcp
+    option tcpka
+    clitcpka-idle 30s
+    clitcpka-intvl 2s
+    clitcpka-cnt 5
+    srvtcpka-idle 30s
+    srvtcpka-intvl 2s
+    srvtcpka-cnt 5
+    timeout queue 250ms
+    timeout connect 2s
+    timeout tunnel 24h
+    timeout client 5s
+    timeout server 5s
+    timeout client-fin 5s
+    timeout server-fin 5s
+    timeout check 2s
+
+frontend api
+    bind 127.0.0.1:{{ apiserver_proxy_port }}
+    default_backend api
+
+backend api
+{% for server in groups[kube_cp_group] -%}
+  {%- if hostvars[server]._kube_apiserver_advertise_address is defined -%}
+    {%- set host_ip = hostvars[server]._kube_apiserver_advertise_address.ipv4.address -%}
+  {%- else -%}
+    {%- set host_ip = hostvars[server].ansible_default_ipv4.address -%}
+  {%- endif %}
+  server node{{ loop.index }} "{{ host_ip }}:{{ apiserver_proxy_apiserver_port }}" check inter 10s fastinter 2s downinter 2s
+{% endfor %}

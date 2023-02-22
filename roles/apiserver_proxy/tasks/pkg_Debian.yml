@@ -1,0 +1,5 @@
+---
+- name: 'Install HAProxy package'
+  apt:
+    name: 'haproxy={{ _apiserver_proxy_haproxy_version }}'
+    state: 'present'
