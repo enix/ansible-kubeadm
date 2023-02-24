@@ -28,7 +28,11 @@ ansible-lint:
 .openstack-test:
   stage: test
   image: registry.gitlab.com/enix.io/ansible-kubeadm/tooling:latest
+  services:
+    - name: docker:23-dind
   variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
     TF_VAR_stem: "${CI_JOB_ID}"
   before_script:
     - git config --global url."https://${GITLAB_ENIX_TOKEN_NAME:-'gitlab-ci-token'}:${GITLAB_ENIX_TOKEN:-${CI_JOB_TOKEN}}@gitlab.enix.io".insteadOf "ssh://git@gitlab.enix.io"
@@ -36,78 +40,8 @@ ansible-lint:
     - ln -s ${CI_PROJECT_DIR}/tests/ssh ~/.ssh
     - tox -e tests --notest
 
-openstack-tests-ansible-2.9:
+openstack-tests-ansible-3:
   extends: .openstack-test
   script:
-    - tox -e ansible-2.9 -- -s -k "install"
-  dependencies: []
-  allow_failure: true
-
-openstack-tests-ansible-2.10-without-private-iface:
-  extends: .openstack-test
-  stage: test-2
-  variables:
-    TF_VAR_allocate_private_net: "false"
-  script:
-    - tox -e ansible-2.10 -- -s -k "install"
-  dependencies: []
-
-.openstack-upgrade:
-  extends: .openstack-test
-  variables:
-    TF_VAR_stem: "${CI_PIPELINE_ID}"
-    TERRAFORM_KEEP: "true"
-  script:
-    - cat tests/terraform/terraform.tfstate || true
-    - tox -e tools -- openstack server list || true
-    - (cd tests/terraform; terraform plan -detailed-exitcode)
-    - tox -e tests -- -s -k "install"
-  after_script:
-    - tox -e tools -- openstack server list || true
-  artifacts:
-    when: always
-    paths:
-      - tests/
-
-install-1.19:
-  extends: .openstack-upgrade
-  variables:
-    ANSIBLE_EXTRA_ARGS: "-e kube_version=${FIRST_VERSION}"
-  script:
-    - tox -e tests -- -s -k "install"
-
-upgrade-1.20:
-  extends: .openstack-upgrade
-  stage: test-2
-  variables:
-    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.20"
-  needs:
-    - job: install-1.19
-      artifacts: true
-
-upgrade-1.21:
-  extends: .openstack-upgrade
-  stage: test-3
-  variables:
-    ANSIBLE_EXTRA_ARGS: "-e kube_version=1.21"
-  needs:
-    - job: upgrade-1.20
-      artifacts: true
-
-upgrade-1.22:
-  extends: .openstack-upgrade
-  stage: test-4
-  variables:
-    ANSIBLE_EXTRA_ARGS: "-e kube_version=${LAST_VERSION}"
-  needs:
-    - job: upgrade-1.21
-      artifacts: true
-
-cleanup:
-  extends: .openstack-upgrade
-  stage: .post
-  script:
-    - (cd tests/terraform; terraform destroy -auto-approve)
-  when: always
-  dependencies:
-    - install-1.19
+    - poetry install
+    - poetry run pytest -s

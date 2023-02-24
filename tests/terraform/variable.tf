@@ -26,6 +26,10 @@ variable "stem" {
   default = "kubeadm"
 }
 
+variable "inventory_dir" {
+  default = "."
+}
+
 variable "allocate_private_net" {
   default = true
 }

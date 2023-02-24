@@ -11,7 +11,7 @@ resource "local_file" "inventory" {
     allocate_private_net = var.allocate_private_net
     private_subnet       = var.private_subnet
   })
-  filename = "${var.stem}-hosts.cfg"
+  filename = "${var.inventory_dir}/${var.stem}-hosts.cfg"
 }
 
 

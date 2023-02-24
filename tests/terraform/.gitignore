@@ -1,3 +1,6 @@
 .terraform
 terraform.tfstate
 terraform.tfstate.backup
+*.cfg
+group_vars
+host_vars

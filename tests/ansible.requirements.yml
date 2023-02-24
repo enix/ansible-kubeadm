@@ -1,2 +1,6 @@
+---
 roles:
   - src: git+ssh://git@gitlab.enix.io/ansible/fix-dns
+    name: fix_dns
+  - geerlingguy.containerd
+  - geerlingguy.ntp

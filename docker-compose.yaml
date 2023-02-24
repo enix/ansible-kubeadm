@@ -1,0 +1,44 @@
+---
+services:
+  terraform:
+    image: hashicorp/terraform:${TERRAFORM_VERSION:-1.3.6}
+    working_dir: "${PWD}/tests/terraform"
+    entrypoint: ["${PWD}/scripts/detect-user.sh", "/bin/sh", "-c", "terraform $$@", "--"]
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ${PWD}:${PWD}
+    - /tmp:/tmp
+    - ./.test-ansible:${HOME}/.ansible
+    - ${SSH_AUTH_SOCK:-/run}:${SSH_AUTH_SOCK:-/run}
+    - ${SSH_KEY:-${HOME}}:${SSH_KEY_MOUNT:-${SSH_KEY:-${HOME}}}
+    environment:
+      KEEP_SERVERS:
+      KEEP_SERVERS_AFTER_FAIL:
+      HOME:
+      OS_CLOUD:
+      OS_CLIENT_CONFIG_FILE:
+      OS_DOMAIN_NAME:
+      POETRY_CACHE_DIR: "${POETRY_CACHE_DIR:-/tmp}"
+      POETRY_VIRTUALENVS_PATH: "${POETRY_VIRTUALENVS_PATH:-/tmp}"
+      SSH_AUTH_SOCK:
+
+  tests:
+    build: .
+    image: ${RUN_TEST_IMAGE:-ghcr.io/enix/ansible-kubeadm:latest}
+    working_dir: "${PWD}"
+    entrypoint: [
+      "${PWD}/scripts/detect-user.sh",
+      "/bin/bash", "-c",
+      "poetry install && poetry run pytest --capture=no $$@", "--"
+    ]
+    command: ["-x"]
+    extends:
+      file: docker-compose.yaml
+      service: terraform
+
+  shell:
+    entrypoint: ["${PWD}/scripts/detect-user.sh"]
+    command: ["-c", "/bin/bash"]
+    extends:
+      file: docker-compose.yaml
+      service: tests

@@ -1,13 +1,36 @@
 ---
+.before-script-docker-registry-login:
+  services:
+    - name: docker:23-dind
+  image: docker:23-git
+  before_script:
+    - docker info   # Rootless take more time to start, you may need "while ! docker info; do sleep 5; done"
+    - echo ${CI_REGISTRY_PASSWORD} | docker login ${CI_REGISTRY} --username ${CI_REGISTRY_USER} --password-stdin
+
+
 build-tooling-image:
   stage: pre-build
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
+  extend: .before-script-docker-registry-login
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    CACHE_FROM: "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}-cache ${CI_REGISTRY_IMAGE}:${CI_DEFAULT_BRANCH}"
+    CACHE_TO: "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}-cache"
+    IMAGE_TAG: "${CI_REGISTRY_IMAGE}:${CI_PIPELINE_IID} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
   script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --cache=true --context .gitlab-ci/tooling --dockerfile .gitlab-ci/tooling/Dockerfile --destination $CI_REGISTRY_IMAGE/tooling:latest
+    - DOCKER_CACHE_FROM=$(echo ${CACHE_FROM} | sed -r 's/([^[:space:]]+)/--cache-from=type=registry,ref=\1/g')
+    - DOCKER_CACHE_TO=$(echo ${CACHE_TO} | sed -r 's/([^[:space:]]+)/--cache-to=type=registry,ref=\1,mode=max/g')
+    - DOCKER_TAG=$(echo ${IMAGE_TAG} | sed -r 's/([^[:space:]]+)/--tag=\1/g')
+    - docker buildx create --use
+    - set -x
+    - docker buildx build
+      --progress=plain
+      --push
+      ${DOCKER_CACHE_FROM}
+      ${DOCKER_CACHE_TO}
+      ${DOCKER_TAG}
+      .
   only:
     changes:
-      - .gitlab-ci/tooling/*
+      - Dockerfile
       - .gitlab-ci/build-tooling-image.yml
