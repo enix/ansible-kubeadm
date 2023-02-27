@@ -21,6 +21,7 @@ services:
       POETRY_CACHE_DIR: "${POETRY_CACHE_DIR:-/tmp}"
       POETRY_VIRTUALENVS_PATH: "${POETRY_VIRTUALENVS_PATH:-/tmp}"
       SSH_AUTH_SOCK:
+      TF_VAR_stem:
 
   tests:
     build: .
