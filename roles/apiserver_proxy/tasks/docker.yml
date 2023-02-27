@@ -49,7 +49,3 @@
       {%- else -%}
         {{ ansible_python.executable }}
       {%- endif -%}
-
-- name: 'export vars'
-  set_fact:
-    control_plane_endpoint: "127.0.0.1:{{ apiserver_proxy_port }}"

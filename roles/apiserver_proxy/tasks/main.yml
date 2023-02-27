@@ -13,3 +13,7 @@
 - name: 'Include package tasks'
   include_tasks: 'package.yml'
   when: not apiserver_proxy_use_docker|bool
+
+- name: 'export vars'
+  set_fact:
+    control_plane_endpoint: "127.0.0.1:{{ apiserver_proxy_port }}"
