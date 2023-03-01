@@ -2,7 +2,7 @@
 services:
   terraform:
     image: hashicorp/terraform:${TERRAFORM_VERSION:-1.3.6}
-    working_dir: "${PWD}/tests/terraform"
+    working_dir: "${PWD}/tests/terraform/openstack"
     entrypoint: ["${PWD}/scripts/detect-user.sh", "/bin/sh", "-c", "terraform $$@", "--"]
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock

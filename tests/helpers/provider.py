@@ -9,7 +9,8 @@ def provider(request):
     if os.environ.get("OS_CLOUD") is not None:
         provider = "openstack"
     else:
-        raise RuntimeError("Openstack EnvVar cannot be found")
+        provider = "vagrant"
+        # raise RuntimeError("Openstack EnvVar cannot be found")
     return request.getfixturevalue(provider)
 
 

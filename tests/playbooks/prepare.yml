@@ -3,6 +3,7 @@
   gather_facts: false
   tasks:
     - wait_for_connection:
+    - command: swapoff -a
 
 - hosts: all
   roles:

@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8.1"
 arrow = "^1.2.3"
+python-vagrant = "^1.0.0"
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.2.0"
