@@ -1,0 +1,61 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+    - wait_for_connection:
+
+- hosts: all
+  roles:
+    - role: fix_dns
+      when: fix_dns|default(false)|bool == true
+
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: "Find cache"
+      find:
+        paths: /var/lib/apt/lists
+      register: apt_lists
+
+    - name: "Update cache"
+      apt:
+        update_cache: yes
+        cache_valid_time: '{{ omit if apt_lists.files | length == 0 else 366000 }}'
+
+- hosts: all
+  gather_facts: false
+  vars:
+    containerd_sysctl_params:
+      net.bridge.bridge-nf-call-iptables: 1
+      net.ipv4.ip_forward: 1
+      net.bridge.bridge-nf-call-ip6tables: 1
+    containerd_module_load:
+      - overlay
+      - br_netfilter
+  tasks:
+    - name: 'Persist module load'
+      copy:
+        content: |
+          {{ containerd_module_load|join('\n') }}
+        dest: /etc/modules-load.d/containerd.conf
+
+    - name: 'load modules for current runtime'
+      modprobe:
+        name: '{{ item }}'
+        state: present
+      with_items: '{{ containerd_module_load }}'
+
+    - name: 'Set sysctl parameters'
+      sysctl:
+        name: '{{ item.key }}'
+        value: '{{ item.value }}'
+        sysctl_set: true
+        sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+      with_dict: '{{ containerd_sysctl_params }}'
+
+
+- hosts: all
+  gather_facts: false
+  roles:
+    - role: geerlingguy.ntp
+    - role: geerlingguy.containerd

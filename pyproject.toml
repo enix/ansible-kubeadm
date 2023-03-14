@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "ansible-kubeadm"
+version = "0.1.0"
+description = "Aims to manage kubeadm based cluster via ansible"
+authors = ["Enix Dev <dev.enix.fr>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+arrow = "^1.2.3"
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^7.2.0"
+pytest-bdd = "^6.1.1"
+ansible-runner = "^2.3.1"
+pytest-virtualenv = {git = "https://github.com/man-group/pytest-plugins.git", subdirectory = "pytest-virtualenv"}
+pyyaml = "^6.0"
+tenacity = "^8.2.2"
+
+
+[tool.poetry.group.lint.dependencies]
+yamllint = "^1.29.0"
+black = "^23.1.0"
+isort = "^5.12.0"
+flake8 = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"

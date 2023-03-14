@@ -1,0 +1,15 @@
+---
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  vars:
+    _cni_path: >-
+      {{ cni_path|default("https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml") }}
+  tasks:
+    - name: "Install kube-router as CNI"
+      command: >-
+        kubectl apply -f {{ _cni_path }}
+      run_once: true
+      register: cni_install
+
+    - debug:
+        var: cni_install
+      run_once: true

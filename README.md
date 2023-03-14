@@ -19,11 +19,11 @@ What ansible-kubeadm expect to be done and will not do:
 
 ## Quickstart
 
-see [Quickstart](docs/quickstart.md) 
+see [Quickstart](docs/quickstart.md)
 
 ## Configuration
 
-If you want a customized (ansible-)kubeadm experience there is a number of variables you can use: 
+If you want a customized (ansible-)kubeadm experience there is a number of variables you can use:
 
 [Variables reference](docs/variables.md)
 
