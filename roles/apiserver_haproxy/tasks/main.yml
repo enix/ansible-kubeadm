@@ -1,4 +1,7 @@
 ---
+- name: 'Detect if compose-based apiserver proxy exists'
+  include_tasks: upgrade_from_docker.yml
+
 - name: 'Add HAProxy repository'
   include_tasks: '{{ item }}'
   with_first_found:
@@ -23,3 +26,7 @@
     group: haproxy
     mode: 0600
   notify: 'Reload HAProxy'
+
+- name: 'export vars'
+  set_fact:
+    control_plane_endpoint: "127.0.0.1:{{ apiserver_proxy_port }}"

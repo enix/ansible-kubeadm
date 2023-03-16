@@ -1,0 +1,7 @@
+---
+apiserver_proxy_apiserver_port: 6443
+_apiserver_proxy_haproxy_version: '2.6.*'
+force_apt_update: false
+
+# From apiserver_docker
+apiserver_proxy_stack_dir: '/etc/docker-compose/apiserver-proxy'

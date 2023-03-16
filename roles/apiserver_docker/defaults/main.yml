@@ -2,6 +2,3 @@
 apiserver_proxy_stack_dir: '/etc/docker-compose/apiserver-proxy'
 apiserver_proxy_port: 7443
 apiserver_proxy_apiserver_port: 6443
-apiserver_proxy_use_docker: true
-_apiserver_proxy_haproxy_version: '2.6.*'
-force_apt_update: false

@@ -53,9 +53,28 @@
         sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
       with_dict: '{{ containerd_sysctl_params }}'
 
-
 - hosts: all
   gather_facts: false
+  vars:
+    _cri_name: "{{ cri_name | default('containerd') }}"
+  tasks:
+    - group_by:
+        key: "cri_{{ cri_name | default('containerd') }}"
+      changed_when: false
+
+- hosts: cri_containerd
+  gather_facts: false
   roles:
-    - role: geerlingguy.ntp
     - role: geerlingguy.containerd
+
+- hosts: cri_docker
+  gather_facts: false
+  roles:
+    - role: geerlingguy.docker
+      vars:
+        docker_install_compose: false
+        docker_daemon_options:
+          exec-opts: ["native.cgroupdriver=systemd"]
+          log-driver: "json-file"
+          log-opts:
+            max-size: "100m"

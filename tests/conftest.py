@@ -148,9 +148,18 @@ def reset_counter(results):
 
 
 @then("I should not see error message")
-def check_error(results):
+def check_no_error(results):
     for run in results["ansible_run"]:
         assert_ansible_error(run)
+
+
+@pytest.fixture
+@then(parsers.re("I should see an error message\:?\s*(?P<error>.*)", re.DOTALL))
+def check_error(results, error=None):
+    (run,) = results["ansible_run"]
+    assert run.status == "failed"
+    if error:
+        assert error in run.stdout.read()
 
 
 @then("I should see no orange/yellow changed tasks")

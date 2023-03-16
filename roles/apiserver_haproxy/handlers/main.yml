@@ -3,3 +3,4 @@
   service:
     name: haproxy
     state: reloaded
+  when: apiserver_docker_compose.stat.exists != True

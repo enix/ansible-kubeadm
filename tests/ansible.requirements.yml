@@ -3,4 +3,5 @@ roles:
   - src: git+https://gitlab.enix.io/ansible/fix-dns
     name: fix_dns
   - geerlingguy.containerd
+  - geerlingguy.docker
   - geerlingguy.ntp

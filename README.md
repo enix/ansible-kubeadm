@@ -25,6 +25,15 @@ see [Quickstart](docs/quickstart.md)
 
 If you want a customized (ansible-)kubeadm experience there is a number of variables you can use:
 
+## Migration planning
+
+Long term migration plan, [*] to indicate current phase
+
+| Reason                                               | Phase 1                                                                                                            | Phase 2                                                         | Phase 3              |
+|------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|----------------------|
+| Docker has been deprecated in kubernetes since 1.24+ | [*] haproxy pkg used by default for proxy. Able to install compose-based proxy. Migration from compose to pkg possible | Not able to install compose-based proxy. Migration possible | Migration phased out |
+
+
 [Variables reference](docs/variables.md)
 
 ## Tips and Tricks

@@ -1,3 +1,4 @@
+---
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   vars:
     _control_plane: true
@@ -6,4 +7,17 @@
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
   roles:
-    - role: apiserver_proxy
+    - role: apiserver_haproxy
+      when: apiserver_proxy_use_docker|bool in [none, false]
+    - role: apiserver_docker
+      when: apiserver_proxy_use_docker|bool == true
+
+- hosts: 'haproxy_upgrade_group:&{{ kube_cp_group|default("kube_control_plane") }}'
+  serial: '{{ upgrade_cp_serial|default(1) }}'
+  roles:
+    - role: apiserver_haproxy_upgrade
+
+- hosts: 'haproxy_upgrade_group:&{{ kube_worker_group|default("kube_workers") }}'
+  serial: '{{ upgrade_worker_serial|default(1) }}'
+  roles:
+    - role: apiserver_haproxy_upgrade

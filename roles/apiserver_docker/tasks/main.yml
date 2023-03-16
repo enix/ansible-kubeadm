@@ -1,4 +1,11 @@
 ---
+- name: 'Include OS specific variables'
+  include_vars: '{{ item }}'
+  with_fileglob:
+    - 'vars/os_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'vars/os_{{ ansible_distribution }}.yml'
+    - 'vars/os_{{ ansible_os_family }}.yml'
+
 - name: 'install docker-python binding'
   package:
     name:
@@ -49,3 +56,7 @@
       {%- else -%}
         {{ ansible_python.executable }}
       {%- endif -%}
+
+- name: 'export vars'
+  set_fact:
+    control_plane_endpoint: "127.0.0.1:{{ apiserver_proxy_port }}"

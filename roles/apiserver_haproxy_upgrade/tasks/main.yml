@@ -1,0 +1,37 @@
+---
+- name: "Upgrade to haproxy"
+  block:
+  - name: "Stop compose stack"
+    docker_compose:
+      project_src: '{{ apiserver_proxy_stack_dir }}'
+      state: absent
+    vars:
+      ansible_python_interpreter: >-
+        {%- if ansible_distribution == "Ubuntu" and ansible_distribution_version == "18.04" -%}
+          /usr/bin/python2
+        {%- else -%}
+          {{ ansible_python.executable }}
+        {%- endif -%}
+
+  - name: "Reload haproxy"
+    service:
+      name: haproxy
+      state: reloaded
+
+  rescue:
+  - name: "Restart compose stack if error occured"
+    docker_compose:
+      project_src: '{{ apiserver_proxy_stack_dir }}'
+      state: present
+    vars:
+      ansible_python_interpreter: >-
+        {%- if ansible_distribution == "Ubuntu" and ansible_distribution_version == "18.04" -%}
+          /usr/bin/python2
+        {%- else -%}
+          {{ ansible_python.executable }}
+        {%- endif -%}
+
+- name: "Remove compose stack to finish upgrade"
+  file:
+    dest: "{{ apiserver_proxy_stack_dir }}"
+    state: absent

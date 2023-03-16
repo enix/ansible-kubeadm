@@ -1,0 +1,4 @@
+---
+dependencies:
+  - role: apiserver_docker_common
+  - role: common_vars
