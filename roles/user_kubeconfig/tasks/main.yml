@@ -3,6 +3,7 @@
   file:  # noqa 208
     dest: '~/.kube'
     state: directory
+  register: kubeconfig_dir
 
 - name: 'copy admin kubeconfig for user'
   copy:  # noqa 208
@@ -10,4 +11,6 @@
     mode: preserve
     src: "/etc/kubernetes/admin.conf"
     dest: "~/.kube/config"
-  when: user_has_kubeconfig|bool
+  when:
+    - user_has_kubeconfig|bool
+    - not (kubeconfig_dir is changed and ansible_check_mode)
