@@ -1,0 +1,2 @@
+---
+kubeadm_hooks_dir: "{{ inventory_dir }}"
