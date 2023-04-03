@@ -1,12 +1,16 @@
 ---
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   vars:
-    _cni_path: >-
-      {{ cni_path|default("https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml") }}
+    kube_router: >-
+      https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml
+    calico: >-
+      https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/calico-vxlan.yaml
+    _cni: "{{ cni|default('kube_router') }}"
   tasks:
-    - name: "Install kube-router as CNI"
+    - name: "Install CNI"
       command: >-
-        kubectl apply -f {{ _cni_path }}
+        kubectl apply -f {{ vars[_cni.replace('-', '_')] }}
+      when: _cni is not false and _cni|trim|length > 0
       run_once: true
       register: cni_install
 
