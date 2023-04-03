@@ -1,0 +1,21 @@
+- name: 'find version of kubeadm to install'
+  pkg_version_match:
+    name: kubeadm
+    version: '{{ target_kubeadm_version }}'
+  when:
+    - target_kubeadm_version is defined
+    - not(kube_repo_just_added is changed and ansible_check_mode)
+  register: kubeadm_version
+
+- name: 'Display of complete version of kubeadm'
+  debug:
+    var: kubeadm_version
+    verbosity: 1
+
+- name: 'Set the same version for all package of Debian'
+  set_fact:
+    kubeadm_version: '{{ kubeadm_dry_run_version }}'
+    kubelet_version: '{{ kubeadm_dry_run_version }}'
+    kubectl_version: '{{ kubeadm_dry_run_version }}'
+  vars:
+    kubeadm_dry_run_version: '{{ {"version": "unknown-version"}|combine(kubeadm_version) }}'

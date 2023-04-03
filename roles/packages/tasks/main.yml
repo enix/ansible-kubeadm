@@ -24,17 +24,12 @@
     - 'kube_repo_{{ ansible_distribution }}.yml'
     - 'kube_repo_{{ ansible_os_family }}.yml'
 
-- name: 'find version of kubeadm to install'
-  pkg_version_match:
-    name: kubeadm
-    version: '{{ target_kubeadm_version }}'
-  when: target_kubeadm_version is defined
-  register: kubeadm_version
-
-- name: 'Display of complete version of kubeadm'
-  debug:
-    var: kubeadm_version
-    verbosity: 1
+- name: 'Find package version'
+  include_tasks: '{{ item }}'
+  with_first_found:
+    - 'find_version_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+    - 'find_version_{{ ansible_distribution }}.yml'
+    - 'find_version_{{ ansible_os_family }}.yml'
 
 - name: 'Compute list of packages'
   set_fact:
@@ -42,7 +37,7 @@
       { {%- for pkg in pkg_list -%}
           '{{ pkg }}':
             '{{ enforce_version|ternary(
-                  packages_force_version[pkg]|default(kubeadm_version.version),
+                  packages_force_version[pkg]|default(vars[pkg ~ '_version'].version),
                   ''
             ) }}',
         {%- endfor -%} }
