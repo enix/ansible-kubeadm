@@ -3,4 +3,6 @@
   service:
     name: haproxy
     state: reloaded
-  when: apiserver_docker_compose.stat.exists != True
+  when:
+    - apiserver_docker_compose.stat.exists != True
+    - not(haproxy_repo_just_added is changed and ansible_check_mode)

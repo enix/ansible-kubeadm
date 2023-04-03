@@ -26,6 +26,8 @@
     group: haproxy
     mode: 0600
   notify: 'Reload HAProxy'
+  when:
+    - not(haproxy_repo_just_added is changed and ansible_check_mode)
 
 - name: 'export vars'
   set_fact:

@@ -3,3 +3,4 @@
   apt:
     name: 'haproxy={{ _apiserver_proxy_haproxy_version }}'
     state: 'present'
+  when: not(haproxy_repo_just_added is changed and ansible_check_mode)
