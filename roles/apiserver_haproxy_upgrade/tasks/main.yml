@@ -12,6 +12,7 @@
         {%- else -%}
           {{ ansible_python.executable }}
         {%- endif -%}
+    when: has_docker_compose|bool
 
   - name: "Reload haproxy"
     service:
@@ -30,6 +31,7 @@
         {%- else -%}
           {{ ansible_python.executable }}
         {%- endif -%}
+    when: has_docker_compose|bool
 
 - name: "Remove compose stack to finish upgrade"
   file:
