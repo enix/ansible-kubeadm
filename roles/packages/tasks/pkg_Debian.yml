@@ -1,46 +1,27 @@
 ---
-- name: 'Get version of kubernetes packages'
-  package_facts:
+- name: "Create pinning files"
+  copy:
+    dest: /etc/apt/preferences.d/{{ item.pkg }}
+    content: |-
+      package: {{ item.pkg }}
+      Pin: version {{ item.version }}
+      Pin-Priority: 1001
+  loop: "{{ kube_package_dict|dict2items('pkg', 'version')|selectattr('version') }}"
+
+- name: "Remove pinning files"
+  file:
+    dest: /etc/apt/preferences.d/{{ item.pkg }}
+    state: absent
+  loop: "{{ kube_package_dict|dict2items('pkg', 'version')|rejectattr('version') }}"
 
 - name: 'Unhold package before upgrade'
   dpkg_selections:
     selection: 'install'
     name: '{{ item }}'
-  with_items: >-
-    {{ kube_package_dict.keys()|intersect(packages.keys())|list }}
-  when:
-    - enforce_version|bool
-    # If any of the package is not install, unhold all packages to make install
-    - kube_package_dict.keys()|map('extract', packages)|map('default')|reject|list|length > 1
-      or
-      current_version != target_version
-  vars:
-    versioned_packages: >-
-      {{ kube_package_dict|dict2items|selectattr('value')|map(attribute='key')|list }}
-    current_version: >-
-      {%- set current_version = {} -%}
-      {%- for pkg in versioned_packages -%}
-          {%- set _ = current_version.update(
-              {pkg: (packages[pkg]|default([{'version': none}])).0.version}) -%}
-      {%- endfor -%}
-      {{ current_version }}
-    target_version: >-
-      {{ kube_package_dict|dict2items|selectattr('value')|list
-            |items2dict(key_name='key', value_name='value') }}
+  loop: "{{ kube_package_dict.keys() }}"
 
 - name: 'Install kubernetes packages'
   apt:
-    name: >-
-      [ {%- for pkg, version in kube_package_dict.items() -%}
-            "{{ pkg }}{{ version|ternary('=' ~ version, '') }}",
-        {%- endfor -%} ]
-    state: 'present'
-
-- name: 'hold package'
-  dpkg_selections:
-    selection: 'hold'
-    name: '{{ item }}'
-  # noqa 104
-  with_items: '{{ kube_package_dict.keys()|list }}'
-  when:
-    - enforce_version|bool
+    name: "{{ kube_package_dict.keys() }}"
+    state: "latest"
+    allow_change_held_packages: "{{ ansible_check_mode if ansible_version.string is version('2.13', '>=') else omit }}"

@@ -1,0 +1,42 @@
+---
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  tasks:
+    - package_facts:
+
+    - debug:
+        msg:
+          - "{{ packages.kubectl }}"
+          - "{{ packages.kubelet }}"
+    - assert:
+        that:
+          - (packages.kubectl|first).version is match(kube_version ~ '.*')
+          - (packages.kubelet|first).version is match(kube_version ~ '.*')
+
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  tasks:
+    - package_facts:
+
+    - debug:
+        msg:
+          - "{{ packages.kubeadm }}"
+    - assert:
+        that:
+          - (packages.kubeadm|first).version is match(kube_version ~ '.*')
+
+    - name: 'Check kubeadm status'
+      command: kubectl get nodes -o yaml
+      changed_when: false
+      check_mode: false
+      register: all_nodes_yaml
+      failed_when: >-
+        dict(kubelet_ready).values()|rejectattr("status", "eq", "True")|list|length != 0
+      retries: 10
+      vars:
+        all_nodes: "{{  (all_nodes_yaml.stdout|from_yaml) }}"
+        kubelet_ready: >-
+          {{ all_nodes['items']|map(attribute="metadata.name")|zip(
+             all_nodes['items']|map(attribute="status.conditions")
+                |map("selectattr", "reason", "eq", "KubeletReady")
+                |map("first")
+                |list
+             ) }}
