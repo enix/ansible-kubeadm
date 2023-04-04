@@ -1,0 +1,5 @@
+---
+- include_tasks: "{{ item }}"
+  loop: >-
+    {{ q('ansible.builtin.fileglob', kubeadm_hooks_dir ~ '/kubeadm.{{ kubeadm_hook_name|mandatory }}.d/*.yml')
+        + vars['kubeadm_hooks_' ~ kubeadm_hook_name]|default([]) }}

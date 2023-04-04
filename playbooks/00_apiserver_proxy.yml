@@ -6,18 +6,48 @@
     - role: find_ip
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  pre_tasks:
+    - include_role:
+        name: hooks_call
+      vars:
+        kubeadm_hook_name: pre_apiserver_proxy
   roles:
     - role: apiserver_haproxy
       when: apiserver_proxy_use_docker|bool in [none, false]
     - role: apiserver_docker
       when: apiserver_proxy_use_docker|bool == true
+  tasks:
+    - include_role:
+        name: hooks_call
+      vars:
+        kubeadm_hook_name: post_apiserver_proxy
 
 - hosts: 'haproxy_upgrade_group:&{{ kube_cp_group|default("kube_control_plane") }}'
   serial: '{{ upgrade_cp_serial|default(1) }}'
+  pre_tasks:
+    - include_role:
+        name: hooks_call
+      vars:
+        kubeadm_hook_name: pre_proxy_upgrade_haproxy
   roles:
     - role: apiserver_haproxy_upgrade
+  tasks:
+    - include_role:
+        name: hooks_call
+      vars:
+        kubeadm_hook_name: post_proxy_upgrade_haproxy
 
 - hosts: 'haproxy_upgrade_group:&{{ kube_worker_group|default("kube_workers") }}'
   serial: '{{ upgrade_worker_serial|default(1) }}'
+  pre_tasks:
+    - include_role:
+        name: hooks_call
+      vars:
+        kubeadm_hook_name: pre_proxy_upgrade_haproxy
   roles:
     - role: apiserver_haproxy_upgrade
+  tasks:
+    - include_role:
+        name: hooks_call
+      vars:
+        kubeadm_hook_name: post_proxy_upgrade_haproxy
