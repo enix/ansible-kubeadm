@@ -1,0 +1,24 @@
+---
+- name: "Detect if compose stack is present"
+  stat:
+    name: '{{ apiserver_proxy_stack_dir }}//docker-compose.yaml'
+  register: apiserver_docker_compose
+
+- name: "Show error when migration is need and apiservers_proxy_use_docker is undefined"
+  fail:
+    msg: >
+      A apiserver proxy base on docker-compose has been detected. As docker has been deprecated in kubernetes 1.24+,
+        therefore the docker based apiserver proxy will be deprecated in ansible-kubeadm.
+      If you want to keep the old docker-compose apiserver proxy set "apiserver_proxy_use_docker: true",
+        if you want to migrate to the default haproxy apiserver set "apiserver_proxy_use_docker: false" (the install default)
+        to trigger the migration.
+  when:
+    - apiserver_docker_compose.stat.exists == True
+    - apiserver_proxy_use_docker is none
+
+- name: "Add host to upgrade group"
+  add_host:
+    name: "{{ item }}"
+    group: haproxy_upgrade_group
+  when: apiserver_docker_compose.stat.exists == True
+  loop: "{{ ansible_play_hosts_all }}"

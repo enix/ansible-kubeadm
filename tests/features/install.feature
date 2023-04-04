@@ -8,7 +8,6 @@ Feature: Install
         When With those group_vars on group all:
             kubelet_config:
               cgroupDriver: "systemd"
-            apiserver_proxy_use_docker: false
             kube_version: 1.23
         When I run the playbook tests/playbooks/prepare.yml
         When I run ansible-kubeadm

@@ -9,3 +9,8 @@ def test_install():
 @scenario("features/upgrade.feature", "Upgrade via ansible-kubeadm")
 def test_upgrade():
     pass
+
+
+@scenario("features/haproxy.feature", "Test upgrade to haproxy pkg")
+def test_haproxy():
+    pass
