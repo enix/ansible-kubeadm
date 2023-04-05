@@ -23,5 +23,5 @@ Feature: Upgrade
 
         When With those group_vars on group all: kube_version: 1.24
         And  I run ansible-kubeadm
-        When I run the playbook tests/playbook/verify.yml
+        When I run the playbook tests/playbooks/verify.yml
         Then I should not see error message
