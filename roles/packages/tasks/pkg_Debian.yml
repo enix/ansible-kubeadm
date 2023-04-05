@@ -1,8 +1,8 @@
 ---
 - name: "Create pinning files"
   copy:
-    dest: /etc/apt/preferences.d/{{ item.pkg }}
-    content: |-
+    dest: /etc/apt/preferences.d/50-{{ item.pkg }}
+    content: |
       package: {{ item.pkg }}
       Pin: version {{ item.version }}
       Pin-Priority: 1001
