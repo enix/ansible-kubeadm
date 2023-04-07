@@ -1,0 +1,51 @@
+---
+# Layout
+# {{ kubeadm_plugins_dir }}/
+#     plugin_name/         # plugins_names
+#       hooks1/            # hooks_names
+#          my_hook1.yml    # hooks_filenames
+#       hooks2/
+#          subdir/
+#             my_hook2.yml # will not be discovered, but could be included
+#
+#  absolute_path_gathers_by_find/{{kubeadm_plugins_dir}}/plugins_name/hooks_name/yaml_file.yml  # hooks_files
+#
+- name: 'List all files'
+  find:
+    path: '{{ kubeadm_plugins_dir }}'
+    recurse: true
+    follow: true
+    depth: 3
+    patterns:
+      - '*.yaml'
+      - '*.yml'
+  delegate_to: localhost
+  register: hooks_find
+
+# sorted_hooks
+# [0] => hooks_filenames => for sorting, hightest weight
+# [1] => plugins_names => for sorting, lowest weight
+# [2] => hooks_names => for filtering/selecting in next task
+# [3] => hooks_files => the final result of the assotiation in next task
+#
+# This means
+# - hooks with "lower" lexicographically filenames will be loaded first, whatever the plugin name
+# - if the filenames are the same, hooks belonging to "lower" lexicograhically plugin will be loaded first
+#
+- name: 'Sort hooks'
+  set_fact:
+    hooks_list: "{{ hooks_names|unique }}"
+    sorted_hooks: "{{ sorted_hooks|sort }}"
+  vars:
+    hooks_files: "{{ hooks_find.files|map(attribute='path')|list }}"
+    plugins_names: >-
+      {{ hooks_files|map("regex_replace", ".*" ~ kubeadm_plugins_dir|regex_escape() ~ "/?([^/]*)/.*", "\g<1>")|list }}
+    hooks_names: >-
+      {{ hooks_files|map("regex_replace", ".*" ~ kubeadm_plugins_dir|regex_escape() ~ "/?[^/]*/?([^/]*)/.*", "\g<1>")|list }}
+    hooks_filenames: "{{ hooks_files|map('basename')|list }}"
+    sorted_hooks: "{{ hooks_filenames|zip(plugins_names, hooks_names, hooks_files)|list }}"
+
+- name: 'Set hook names'
+  set_fact:
+    '_kubeadm_hooks_{{ item }}': '{{ sorted_hooks|selectattr(2, "eq", item)|map(attribute=3)|list }}'
+  loop: '{{ hooks_list }}'

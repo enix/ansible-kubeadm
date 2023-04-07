@@ -1,5 +1,11 @@
 ---
-- include_tasks: "{{ item }}"
+# prepend '_kubeadm_hooks_' to each hook name
+# get value from those
+# don't care if they don't exist
+# flatten the list of list
+# include each of them
+#
+- name: "Call hooks for {{kubeadm_hook_list}}"
+  include_tasks: "{{ item }}"
   loop: >-
-    {{ q('ansible.builtin.fileglob', kubeadm_hooks_dir ~ '/kubeadm.{{ kubeadm_hook_name|mandatory }}.d/*.yml')
-        + vars['kubeadm_hooks_' ~ kubeadm_hook_name]|default([]) }}
+    {{ ['_kubeadm_hooks_'] | product(kubeadm_hook_list)|map('join')|map('extract', vars)|map('default', [])|list|flatten }}

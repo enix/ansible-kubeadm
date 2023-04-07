@@ -8,7 +8,11 @@ ${server} ansible_host=${ip}
 ${server} ansible_host=${ip}
 %{ endfor ~}
 
-[all:vars]
+[kube:children]
+kube_control_plane
+kube_workers
+
+[kube:vars]
 %{ if allocate_private_net == true ~}
 kube_control_plane_cidr="${private_subnet}"
 kubelet_node_ip_cidr="${private_subnet}"

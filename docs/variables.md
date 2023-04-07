@@ -1,6 +1,6 @@
 User facing variables:
 
-For hooks where a variable-per-hook is exposed, see [hooks](hooks.md)
+For hooks where a variable-per-hook is exposed, see [hooks && plugins](hooks_and_plugins.md)
 
 | name                              | scope               | default                               | usage                                                                                                                                                                                                                  |
 | --------------------------------- | ------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -12,8 +12,7 @@ For hooks where a variable-per-hook is exposed, see [hooks](hooks.md)
 | kube_controller_manager_bind_cidr | control plane       | "" (let kubeadm default)              | CIDR (eg "192.168.99.0/24") filter the bind address for `_kube_controller_manager_bind_address` (override `kube_control_plane_cidr`)                                                                                   |
 | kube_scheduler_bind_cidr          | control plane       | "" (let kubeadm default)              | CIDR (eg "192.168.99.0/24") filter the bind address for `_kube_scheduler_bind_address` (override `kube_control_plane_cidr`)                                                                                            |
 | kubeadm_extra_patches             | control plane       | {}                                    | dictionnary containing extra kubeadm patches to deploy (key = "filename", value = "patch to template")                                                                                                                 |
-| kubeadm_hooks_dir                 | nodes               | "{{ inventory_dir }}"                 | directory where to look for hooks. (Not directly, in a `kubeadm.<hok_name>.d` subfolder                                                                                                                                |
-| kubeadm_hooks_*                   | nodes               | []                                    | list of files to add to discovered hooks
+| kubeadm_plugins_dir               | nodes               | "{{ inventory_dir }}"                 | directory where to look for hooks. (Not directly, in a `kubeadm.<hok_name>.d` subfolder                                                                                                                                |
 | kubeadm_patch_dir                 | control plane       | "/etc/kubeadm/directory"              | directory containing patch for kubeadm                                                                                                                                                                                 |
 | kubeadm_patch_owner               | control plane       | "root"                                | owner of the patches created in `kubeadm_patch_dir`                                                                                                                                                                    |
 | kubeadm_patch_group               | control plane       | "root"                                | group of the patched created in `kubeadm_patch_dir`                                                                                                                                                                    |
@@ -39,5 +38,6 @@ Internal variables:
 | _kube_apiserver_advertise_address     | roles               |                          | Interface object|
 | _kube_controller_manager_bind_address | roles               |                          | Interface object|
 | _kube_scheduler_bind_address          | roles               |                          | Interface object|
+| _kubeadm_hooks_*                      | nodes               | []                       | list of files to add to discovered hooks
 | _kubelet_node_ip                      | roles               |                          | Interface object|
 | _apiserver_proxy_haproxy_version      | nodes               | "2.6.*"                  | HAProxy version to install via package for apiserver_proxy |
