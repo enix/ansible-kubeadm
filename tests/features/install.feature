@@ -17,12 +17,12 @@ Feature: Install
               cgroupDriver: "systemd"
             kube_version: 1.23
         When I run the playbook tests/playbooks/prepare.yml
-        When I run ansible-kubeadm
+        When I run the playbooks 00_apiserver_proxy.yml
+                                 01_site.yml
         When I run the playbook tests/playbooks/cni.yml
-        When I run the playbook tests/playbooks/verify.yml
-        Then I should not see error message
+        Then I should have a working cluster
 
         When I reset tasks counters
-        And  I run ansible-kubeadm
-        Then I should not see error message
-        And  I should see no orange/yellow changed tasks
+        And  I run the playbooks 00_apiserver_proxy.yml
+                                 01_site.yml
+        Then I should see no orange/yellow changed tasks

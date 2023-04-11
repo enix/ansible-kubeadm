@@ -28,7 +28,9 @@ def install_galaxy_deps(virtualenv):
     )
 
 
-def run_ansible_playbook(virtualenv, playbooks, ansible_extra_args=None, **kwargs):
+def run_ansible_playbook(
+    virtualenv, playbooks, dry_run=False, ansible_extra_args=None, **kwargs
+):
     if isinstance(playbooks, str):
         playbooks = [playbooks]
     playbooks = [
@@ -41,9 +43,12 @@ def run_ansible_playbook(virtualenv, playbooks, ansible_extra_args=None, **kwarg
     envvars = dict(os.environ)
     envvars.setdefault("ANSIBLE_HOST_KEY_CHECKING", "false")
     envvars.setdefault("ANSIBLE_FORCE_COLOR", "true")
+    cmdline = " ".join(itertools.chain(ansible_extra_args or [], playbooks))
+    if dry_run:
+        cmdline += " -C"
     return ansible_runner.run(
         binary=os.path.join(virtualenv.virtualenv, "bin/ansible-playbook"),
-        cmdline=" ".join(itertools.chain(ansible_extra_args or [], playbooks)),
+        cmdline=cmdline,
         envvars=envvars,
         **kwargs
     )

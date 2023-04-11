@@ -118,48 +118,64 @@ def results():
     return {}
 
 
-@when(parsers.parse("I run the playbook {playbook}"))
-@tenacity.retry(reraise=True, stop=tenacity.stop_after_attempt(2))
-def prepare_vm(
-    inventory, virtualenv, galaxy_deps, ansible_extra_args, results, playbook
-):
-    result = run_ansible_playbook(
-        virtualenv, playbook, ansible_extra_args=ansible_extra_args, inventory=inventory
+@when(
+    parsers.re(
+        r"I (?P<dry_run>dry-)?run the playbooks?:?\s+(?P<playbooks>.+?)(?P<with_err>\s+with error:?\s+)?(?(with_err)(?P<error>.+)|\Z)",
+        re.DOTALL,
     )
-    assert_ansible_error(result)
-
-
-@when("I run ansible-kubeadm")
+)
 @tenacity.retry(reraise=True, stop=tenacity.stop_after_attempt(2))
-def ansible_kubeadm(inventory, virtualenv, galaxy_deps, ansible_extra_args, results):
-    playbooks = ["playbooks/00_apiserver_proxy.yml", "playbooks/01_site.yml"]
+def ansible_playbook(
+    inventory,
+    virtualenv,
+    galaxy_deps,
+    ansible_extra_args,
+    results,
+    playbooks,
+    dry_run,
+    error,
+):
+    if dry_run == "dry-":
+        dry_run = True
+    else:
+        dry_run = False
+    playbook_list = re.findall(r"[\w./]+", playbooks)
+    if not all(os.path.exists(p) for p in playbook_list):
+        playbook_list_subdir = [os.path.join("playbooks", p) for p in playbook_list]
+        if all(os.path.exists(p) for p in playbook_list_subdir):
+            playbook_list = playbook_list_subdir
+        else:
+            raise ValueError("All playbooks could not be found")
     result = run_ansible_playbook(
         virtualenv,
-        playbooks,
+        playbook_list,
+        ansible_extra_args=ansible_extra_args,
+        inventory=inventory,
+        dry_run=dry_run,
+    )
+    if error:
+        assert result.status == "failed"
+        assert error.strip() in result.stdout.read()
+    else:
+        assert_ansible_error(result)
+    results.setdefault("ansible_run", []).append(result)
+
+
+@then("I should have a working cluster")
+@tenacity.retry(reraise=True, stop=tenacity.stop_after_attempt(2))
+def ansible_kubeadm(inventory, virtualenv, galaxy_deps, ansible_extra_args, results):
+    result = run_ansible_playbook(
+        virtualenv,
+        ["tests/playbooks/verify.yml"],
         ansible_extra_args=ansible_extra_args,
         inventory=inventory,
     )
-    results.setdefault("ansible_run", []).append(result)
+    assert_ansible_error(result)
 
 
 @when("I reset tasks counters")
 def reset_counter(results):
     results["ansible_run"] = []
-
-
-@then("I should not see error message")
-def check_no_error(results):
-    for run in results["ansible_run"]:
-        assert_ansible_error(run)
-
-
-@pytest.fixture
-@then(parsers.re("I should see an error message\:?\s*(?P<error>.*)", re.DOTALL))
-def check_error(results, error=None):
-    (run,) = results["ansible_run"]
-    assert run.status == "failed"
-    if error:
-        assert error in run.stdout.read()
 
 
 @then("I should see no orange/yellow changed tasks")
