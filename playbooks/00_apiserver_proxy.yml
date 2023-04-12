@@ -1,4 +1,10 @@
 ---
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  gather_facts: false
+  tags: ['always', 'plugins']
+  roles:
+    - role: hooks_plugins_register
+
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   vars:
     _control_plane: true
@@ -10,7 +16,7 @@
     - include_role:
         name: hooks_call
       vars:
-        kubeadm_hook_name: pre_apiserver_proxy
+        kubeadm_hook_list: ['pre_apiserver_proxy']
   roles:
     - role: apiserver_haproxy
       when: apiserver_proxy_use_docker|bool in [none, false]
@@ -20,7 +26,7 @@
     - include_role:
         name: hooks_call
       vars:
-        kubeadm_hook_name: post_apiserver_proxy
+        kubeadm_hook_list: ['post_apiserver_proxy']
 
 - hosts: 'haproxy_upgrade_group:&{{ kube_cp_group|default("kube_control_plane") }}'
   serial: '{{ upgrade_cp_serial|default(1) }}'
@@ -28,14 +34,14 @@
     - include_role:
         name: hooks_call
       vars:
-        kubeadm_hook_name: pre_proxy_upgrade_haproxy
+        kubeadm_hook_list: ['pre_proxy_upgrade_haproxy']
   roles:
     - role: apiserver_haproxy_upgrade
   tasks:
     - include_role:
         name: hooks_call
       vars:
-        kubeadm_hook_name: post_proxy_upgrade_haproxy
+        kubeadm_hook_list: ['post_proxy_upgrade_haproxy']
 
 - hosts: 'haproxy_upgrade_group:&{{ kube_worker_group|default("kube_workers") }}'
   serial: '{{ upgrade_worker_serial|default(1) }}'
@@ -43,11 +49,11 @@
     - include_role:
         name: hooks_call
       vars:
-        kubeadm_hook_name: pre_proxy_upgrade_haproxy
+        kubeadm_hook_list: ['pre_proxy_upgrade_haproxy']
   roles:
     - role: apiserver_haproxy_upgrade
   tasks:
     - include_role:
         name: hooks_call
       vars:
-        kubeadm_hook_name: post_proxy_upgrade_haproxy
+        kubeadm_hook_list: ['post_proxy_upgrade_haproxy']

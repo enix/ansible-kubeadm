@@ -29,7 +29,7 @@ If you want a customized (ansible-)kubeadm experience there is a number of varia
 
 ## Flow
 
-If you're looking for what ansible-kubeadm is doing step-by-step, [hooks](docs/hooks.md) is a good way to start.
+If you're looking for what ansible-kubeadm is doing step-by-step, [hooks && plugins](docs/hooks_and_plugins.md) is a good way to start.
 
 ## Migration planning
 
