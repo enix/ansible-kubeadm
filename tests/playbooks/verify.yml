@@ -30,13 +30,14 @@
       register: all_nodes_yaml
       failed_when: >-
         dict(kubelet_ready).values()|rejectattr("status", "eq", "True")|list|length != 0
+      until: all_nodes_yaml is not failed
       retries: 10
       vars:
         all_nodes: "{{  (all_nodes_yaml.stdout|from_yaml) }}"
         kubelet_ready: >-
           {{ all_nodes['items']|map(attribute="metadata.name")|zip(
              all_nodes['items']|map(attribute="status.conditions")
-                |map("selectattr", "reason", "eq", "KubeletReady")
+                |map("selectattr", "type", "eq", "Ready")
                 |map("first")
                 |list
              ) }}

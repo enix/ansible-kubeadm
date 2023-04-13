@@ -16,6 +16,7 @@ from tests.helpers.ansible import (
 )
 from tests.helpers.provider import cluster, provider  # noqa: F401, Those are fixtures
 from tests.helpers.terraform import TerraformCompose
+from tests.helpers.vagrant import LocalVagrant
 
 
 def pytest_addoption(parser):
@@ -54,16 +55,20 @@ def ansible_extra_args(request):
 @pytest.fixture
 def openstack(tmp_path):
     return TerraformCompose(
-        tfdata_dir=os.path.join(os.path.dirname(__file__), "terraform"),
         envs={"TF_VAR_inventory_dir": tmp_path},
         mounts={tmp_path: tmp_path},
     )
 
 
+@pytest.fixture
+def vagrant():
+    return LocalVagrant()
+
+
 @then("Set cluster {variable}={value}")
 @given("The cluster {variable)={value}")
 def cluster_set_param(provider, variable, value):
-    provider.envs[f"TF_VAR_{variable}"] = value
+    provider.vars[variable] = value
     # Refresh infrastructure
     provider.apply()
 
