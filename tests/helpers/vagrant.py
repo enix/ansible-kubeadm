@@ -1,14 +1,16 @@
 import os
+import shutil
 
 import vagrant
 
 
 class LocalVagrant:
-    def __init__(self, envs={}):
+    def __init__(self, envs={}, inventory_dir_copy=None):
         self.vagrant = vagrant.Vagrant(quiet_stdout=False, quiet_stderr=False)
         std_envs = dict(os.environ)  # Inherit from current env, not reset it.
         std_envs.update(envs)
         std_envs.setdefault("SKIP_ANSIBLE", "true")
+        self.inventory_dir_copy = inventory_dir_copy
         self.vagrant.env = std_envs
 
     @property
@@ -25,13 +27,23 @@ class LocalVagrant:
         return self
 
     @property
-    def inventory(self):
+    def vagrant_inventory(self):
         return os.path.join(
             os.path.dirname(__file__),
             "..",
             "..",
             ".vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory",
         )
+
+    @property
+    def inventory(self):
+        # give a fresh dir each time, to add group vars
+        if self.inventory_dir_copy:
+            new_inventory = os.path.join(self.inventory_dir_copy, "vagrant.cfg")
+            shutil.copyfile(self.vagrant_inventory, new_inventory)
+            return new_inventory
+        else:
+            return self.vagrant_inventory
 
     def destroy(self):
         self.vagrant.destroy()

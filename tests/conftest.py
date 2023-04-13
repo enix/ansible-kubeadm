@@ -61,8 +61,8 @@ def openstack(tmp_path):
 
 
 @pytest.fixture
-def vagrant():
-    return LocalVagrant()
+def vagrant(tmpdir):
+    return LocalVagrant(inventory_dir_copy=tmpdir)
 
 
 @then("Set cluster {variable}={value}")
