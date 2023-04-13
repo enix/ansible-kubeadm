@@ -1,2 +1,5 @@
 ---
+_upgrade_reasons: {}
+_failure_reasons: {}
+
 kubelet_config_path: /var/lib/kubelet/config.yaml

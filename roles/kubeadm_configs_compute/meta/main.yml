@@ -1,6 +1,7 @@
 ---
 dependencies:
   - role: find_running_cp
+  - role: common_vars
 galaxy_info:
   author: Julien Girardin
   description: Fetch and update kubeadm configs in memory

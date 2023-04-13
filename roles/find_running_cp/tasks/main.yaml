@@ -4,6 +4,18 @@
     path: '{{ apiserver_manifest }}'
   register: apiserver_manifest_stat
 
+- name: 'Find if kube-apiserver manifest is present'
+  stat:
+    path: '{{ kubeconfig_admin }}'
+  register: kubeconfig_admin_stat
+
+- name: 'Find if kubectl is present'
+  command: which kubectl
+  register: found_kubectl
+  changed_when: false
+  check_mode: false
+  failed_when: found_kubectl.rc not in [0, 1]
+
 - name: 'Find node with manifests (more likely to be running)'
   add_host:
     name: '{{ item }}'
@@ -12,9 +24,14 @@
   check_mode: false
   run_once: true
   with_items: >-
-    {{ ansible_play_hosts|zip(ansible_play_hosts
-         |map("extract", hostvars, ['apiserver_manifest_stat', 'stat', 'exists'])
-       )|selectattr('1')|map(attribute='0')|list }}
+    {{ ansible_play_hosts|zip(
+        ansible_play_hosts|map("extract", hostvars, ['apiserver_manifest_stat', 'stat', 'exists']),
+        ansible_play_hosts|map("extract", hostvars, ['kubeconfig_admin_stat', 'stat', 'exists']),
+        ansible_play_hosts|map("extract", hostvars, ['found_kubectl', 'rc']),
+       ) |selectattr(1)
+         |selectattr(2)
+         |selectattr(3, "equalto", 0)
+         |map(attribute='0')|list }}
 
 - name: 'Display list of machine with a potentially running control-plane'
   debug:

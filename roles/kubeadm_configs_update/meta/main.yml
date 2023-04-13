@@ -1,5 +1,6 @@
 ---
-dependencies: []
+dependencies:
+  - role: common_vars
 galaxy_info:
   author: Julien Girardin
   description: Persist updates kubeadm configs in cluster configMaps

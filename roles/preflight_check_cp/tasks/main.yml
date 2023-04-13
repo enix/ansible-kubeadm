@@ -17,9 +17,9 @@
     target_kubeadm_version: '{{ _kubeadm_version }}'
   vars:
     _kube_version: >-
-      {%- if current_cp_version -%}
-        {%- if current_cp_version|regex_search(kube_version ~ '.*') or not kube_version -%}
-           {{ current_cp_version }}
+      {%- if _current_cp_version -%}
+        {%- if _current_cp_version|regex_search(kube_version ~ '.*') or not kube_version -%}
+           {{ _current_cp_version }}
         {%- else -%}
            {{ kube_version|default(default_kube_version, true) }}
         {%- endif -%}
@@ -44,37 +44,6 @@
   debug:
     var: target_kubeadm_version
 
-- name: 'Check that version upgrade is one step'
-  fail:
-    msg: 'Version upgrade is not allowed: {{ current_cp_version }} => {{ target_kube_version }}'
-  when:
-    - current_cp_version|length > 0
-    - (current_major != target_major) or (current_minor|int - target_minor|int)|abs > 1
-  vars:
-    current_version_split: '{{ (current_cp_version|regex_findall("(?:\d+)"))[0:2] }}'
-    current_major: '{{ current_version_split|first }}'
-    current_minor: '{{ current_version_split|last }}'
-    target_version_split: '{{ (target_kube_version|regex_findall("(?:\d+)"))[0:2] }}'
-    target_major: '{{ target_version_split|first }}'
-    target_minor: '{{ target_version_split|last }}'
+- import_tasks: check_version.yml
 
-- name: 'Add control_plan to cp_init, if no cluster found'
-  add_host:
-    name: '{{ ansible_play_hosts|first }}'
-    group: cp_init
-  changed_when: false
-  check_mode: false
-  run_once: true
-  when:
-    - groups.cp_running|default([])|length == 0
-
-- name: 'Add control_plane to cp_upgrade, if upgrade needed'
-  add_host:
-    name: '{{ (groups.cp_running|default([0], true))|first }}'
-    group: cp_upgrade
-  changed_when: false
-  check_mode: false
-  run_once: true
-  when:
-    - current_cp_version|length > 0
-    - not(current_cp_version|regex_search(target_kube_version ~ '.*'))
+- import_tasks: check_control_plane_endpoint.yml

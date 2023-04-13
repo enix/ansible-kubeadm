@@ -3,55 +3,8 @@
   set_fact:
     target_kube_version: '{{ hostvars[cp_node].target_kube_version }}'
     target_kubeadm_version: '{{ hostvars[cp_node].target_kubeadm_version }}'
-    kubelet_config_final: '{{ hostvars[cp_node].kubelet_config_final }}'
+    _kubelet_config_final: '{{ hostvars[cp_node]._kubelet_config_final }}'
 
-- name: 'Get version of kubelet package'
-  package_facts:
+- import_tasks: check_kubelet_version.yml
 
-- name: 'Display info about kubectl'
-  debug:
-    var: packages.kubectl
-
-- name: 'Display wanted version of kubeadm'
-  debug:
-    var: target_kubeadm_version
-
-- name: 'Test if local kubelet config exists'
-  stat:
-    path: '{{ kubelet_config_path }}'
-  register: kubelet_config_stat
-
-- name: 'Fetch local kubelet config if exist'
-  slurp:
-    path: '{{ kubelet_config_path }}'
-  register: kubelet_config_fetch
-  when: kubelet_config_stat.stat.exists
-
-- name: 'Display diff in config'
-  ansible.utils.fact_diff:
-    # "e30K" means "{}" in base64
-    before: '{{ (kubelet_config_fetch.content|default("e30K")|b64decode)|from_yaml }}'
-    after: '{{ kubelet_config_final }}'
-  register: kubelet_config_diff
-  when: kubelet_config_fetch.content is defined
-
-- name: 'Add to upgrade group if difference found'
-  add_host:
-    groups: nodes_upgrade
-    name: '{{ item }}'
-  run_once: true
-  check_mode: false
-  changed_when: false
-  # noqa 104
-  with_items: '{{ upgrade_nodes|unique }}'
-  vars:
-    upgrade_nodes: >-
-      [ {%- for host in ansible_play_hosts
-            if hostvars[host].packages.kubelet|default([])
-             |rejectattr('version', 'eq', target_kubeadm_version)|list|length > 0 -%}
-            '{{ host }}',
-        {%- endfor -%}
-        {%- for host in ansible_play_hosts
-            if hostvars[host].kubelet_config_diff.diff_lines|default([])|length > 0 -%}
-              '{{ host }}',
-        {%- endfor -%} ]
+- import_tasks: check_kubelet_config.yml

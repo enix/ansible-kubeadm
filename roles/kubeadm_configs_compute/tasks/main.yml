@@ -1,0 +1,174 @@
+---
+- name: 'Kubeadm config compute'
+  run_once: true
+  delegate_to: '{{ cp_node }}'
+  block:
+    - name: 'get kubeadm configmap if cluster running'
+      command: kubectl get cm -o jsonpath='{.data.ClusterConfiguration}' -n kube-system kubeadm-config
+      changed_when: false
+      check_mode: false
+      register: _in_cluster_kubeadm_config
+      when:
+        - groups.cp_running|default([])|length > 0
+      environment:
+        KUBECONFIG: '{{ kubeconfig_admin }}'
+
+    - name: 'Display current kubeadm-config raw output'
+      debug:
+        var: _in_cluster_kubeadm_config
+        verbosity: 1
+
+    - name: 'Find kubeadm config'
+      set_fact:
+        _cluster_config_orig: '{{ _cluster_config_orig }}'
+        _current_cp_version: >-
+          {{ _cluster_config_orig.get("kubernetesVersion", "")
+             |regex_replace("v(.*)", "\g<1>") }}
+      vars:
+        _cluster_config_orig: >-
+          {%- if _in_cluster_kubeadm_config is skipped -%}
+             {}
+          {%- else -%}
+            {{ _in_cluster_kubeadm_config.stdout|from_yaml }}
+          {%- endif -%}
+
+    - name: 'Display current extracted ClusterConfig'
+      debug:
+        var: _cluster_config_orig
+        verbosity: 1
+
+    - name: 'Get unversioned kubelet configmap if cluster running'
+      command: >-
+        kubectl -n kube-system get cm
+        --ignore-not-found=true
+        -o jsonpath='{.data.kubelet}'
+        kubelet-config
+      changed_when: false
+      check_mode: false
+      register: _in_cluster_kubelet_config_unversioned
+      when:
+        - groups.cp_running|default([])|length > 0
+      environment:
+        KUBECONFIG: '{{ kubeconfig_admin }}'
+
+    - name: 'Get versioned kubelet configmap if cluster running'
+      command: >-
+        kubectl -n kube-system get cm
+        -o jsonpath='{.data.kubelet}'
+        kubelet-config-{{ (_current_cp_version|regex_findall('(?:\d+)'))[0:2]|join('.') }}
+      changed_when: false
+      check_mode: false
+      register: _in_cluster_kubelet_config_versioned
+      when:
+        - groups.cp_running|default([])|length > 0
+        - _in_cluster_kubelet_config_unversioned.stdout|length == 0
+      environment:
+        KUBECONFIG: '{{ kubeconfig_admin }}'
+
+    - name: 'Get kubelet configmap if cluster running'
+      set_fact:
+        _in_cluster_kubelet_config: >-
+          {%- if _in_cluster_kubelet_config_unversioned.stdout|default("")|length > 0 -%}
+            {{ _in_cluster_kubelet_config_unversioned }}
+          {%- else -%}
+            {{ _in_cluster_kubelet_config_versioned }}
+          {%- endif -%}
+
+    - name: 'get kubeproxy configmap if cluster running'
+      command: >-
+        kubectl -n kube-system get cm
+        -o jsonpath='{.data.config\.conf}'
+        kube-proxy
+      changed_when: false
+      check_mode: false
+      register: _in_cluster_kubeproxy_config
+      when:
+        - groups.cp_running|default([])|length > 0
+      environment:
+        KUBECONFIG: '{{ kubeconfig_admin }}'
+
+    - name: 'Set default kubeadm-config if empty set'
+      set_fact:
+        control_plane_endpoint: >-
+          {% if control_plane_endpoint is defined -%}
+            {{ control_plane_endpoint }}
+          {%- elif _cluster_config_orig.controlPlaneEndpoint is defined -%}
+            {{ _cluster_config_orig.controlPlaneEndpoint }}
+          {%- endif -%}
+        _kubelet_config_orig: >-
+          {%- if _in_cluster_kubelet_config is skipped -%}
+            {}
+          {%- else -%}
+            {{ _in_cluster_kubelet_config.stdout|from_yaml }}
+          {%- endif -%}
+        _kubeproxy_config_orig: >-
+          {%- if _in_cluster_kubeproxy_config is skipped -%}
+            {}
+          {%- else -%}
+            {{ _in_cluster_kubeproxy_config.stdout|from_yaml }}
+          {%- endif -%}
+
+
+    - name: 'Display computed "control_plane_endpoint'
+      debug:
+        var: control_plane_endpoint
+        verbosity: 1
+
+    - name: 'Display current Kubelet config'
+      debug:
+        var: _kubelet_config_orig
+        verbosity: 1
+
+    - name: 'Display current KubeProxy config'
+      debug:
+        var: _kubeproxy_config_orig
+        verbosity: 1
+
+    - name: 'merge requested kubeadm config with existing one'
+      set_fact:
+        _cluster_config_final: >-
+          {%- if control_plane_endpoint|string|lower == 'false' -%}
+             {%- set _ = cluster_config_orig.pop('controlPlaneEndpoint', false) -%}
+          {%- elif control_plane_endpoint -%}
+             {%- set cluster_config = cluster_config|combine({'controlPlaneEndpoint': control_plane_endpoint}) -%}
+          {%- endif -%}
+          {{ _cluster_config_orig|default(default_kubeadm_config, true)|combine(cluster_config, recursive=true) }}
+        _kubelet_config_final: >-
+          {{ _kubelet_config_orig|default(default_kubelet_config, true)|combine(kubelet_config, recursive=true) }}
+        _kubeproxy_config_final: >-
+          {{ _kubeproxy_config_orig|default(default_kubeproxy_config, true)|combine(kubeproxy_config, recursive=true) }}
+
+    - name: 'Make diff cluster_config'
+      ansible.utils.fact_diff:
+        before: '{{ _cluster_config_orig }}'
+        after: '{{ _cluster_config_final }}'
+      register: _cluster_config_diff
+
+    - name: 'Make diff on kubelet_config'
+      ansible.utils.fact_diff:
+        before: '{{ _kubelet_config_orig }}'
+        after: '{{ _kubelet_config_final }}'
+      register: _kubelet_config_diff
+
+    - name: 'Make diff on kubeproxy_config'
+      ansible.utils.fact_diff:
+        before: '{{ _kubeproxy_config_orig }}'
+        after: '{{ _kubeproxy_config_final }}'
+      register: _kubeproxy_config_diff
+
+    - name: "Register diffs as upgrade reasons"
+      set_fact:
+        _config_upgrade_reasons: >-
+          {%- if _cluster_config_diff.diff_lines|length > 0 -%}
+            {%- set _config_upgrade_reasons = _config_upgrade_reasons|combine(
+                dict(cluster_config_diff=_cluster_config_diff.diff_lines)) -%}
+          {%- endif -%}
+          {%- if _kubelet_config_diff.diff_lines|length > 0 -%}
+            {%- set _config_upgrade_reasons = _config_upgrade_reasons|combine(
+                dict(kubelet_config_diff=_kubelet_config_diff.diff_lines)) -%}
+          {%- endif -%}
+          {%- if _kubeproxy_config_diff.diff_lines|length > 0 -%}
+            {%- set _config_upgrade_reasons = _config_upgrade_reasons|combine(
+                dict(kubeproxy_config_diff=_kubeproxy_config_diff.diff_lines)) -%}
+          {%- endif -%}
+          {{ _config_upgrade_reasons }}

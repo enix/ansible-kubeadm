@@ -1,4 +1,6 @@
 ---
+_config_upgrade_reasons: {}
+
 cluster_config: {}
 kubelet_config: {}
 kubeproxy_config: {}

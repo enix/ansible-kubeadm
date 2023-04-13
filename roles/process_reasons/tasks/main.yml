@@ -1,0 +1,54 @@
+---
+- debug:
+    var: _failure_reasons
+
+- name: 'Fail if failure reasons found'
+  fail:
+    msg: 'Look at previous debug for reasons.'
+  when: _failure_reasons|length > 0
+
+- name: 'Display config upgrade reasons'
+  debug:
+    var: _config_upgrade_reasons
+
+- name: 'Display upgrade reasons'
+  debug:
+    var: _upgrade_reasons
+
+- name: 'Pause to review diff and upgrade reasons'
+  pause:
+  when:
+    - _upgrade_reasons|length > 0 or _config_upgrade_reasons|length > 0
+    - groups.cp_running|default([])|length > 0
+    - not action_reasons_review_skip|bool
+
+- name: 'Add control_plane to cp_init, if no cluster found'
+  add_host:
+    name: '{{ groups[kube_cp_group]|first }}'
+    group: cp_init
+  changed_when: false
+  check_mode: false
+  run_once: true
+  when:
+    - groups.cp_running|default([])|length == 0
+
+- name: 'Add control_plane to cp_upgrade, if upgrade needed'
+  add_host:
+    name: '{{ (groups.cp_running|default([0], true))|first }}'
+    group: cp_upgrade
+  changed_when: false
+  check_mode: false
+  when:
+    - "'upgrade_version' in _config_upgrade_reasons"
+
+- name: 'Select node for upgrade if upgrade reasons found'
+  add_host:
+    groups: nodes_upgrade
+    name: '{{ item }}'
+  run_once: true
+  check_mode: false
+  changed_when: false
+  loop: >-
+    {{ ansible_play_hosts|zip(
+          ansible_play_hosts|map('extract', hostvars, '_upgrade_reasons')|map('default', {}))
+          |selectattr(1)|map(attribute=0) }}
