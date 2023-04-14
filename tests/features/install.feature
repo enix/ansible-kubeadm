@@ -17,6 +17,8 @@ Feature: Install
               cgroupDriver: "systemd"
             kube_version: 1.23
         When I run the playbook tests/playbooks/prepare.yml
+        When I dry-run the playbooks 00_apiserver_proxy.yml
+                                     01_site.yml
         When I run the playbooks 00_apiserver_proxy.yml
                                  01_site.yml
         When I run the playbook tests/playbooks/cni.yml

@@ -18,6 +18,8 @@
   run_once: true
   delegate_to: '{{ cp_node }}'
   register: current_nodes
+  when:
+  - not(hostvars[cp_node].found_kubectl.rc == 1 and ansible_check_mode)
 
 - name: 'Display current node'
   debug:
@@ -43,7 +45,8 @@
   register: kubeadm_node_join
   when: ansible_nodename not in nodes_list
   vars:
-    nodes_list: '{{ current_nodes["items"]|map(attribute="metadata.name")|list }}'
+    # "items" cannot be defaulted easily as jinja fallback on using method instead
+    nodes_list: "{{ ({'items': []}|combine(current_nodes))['items']|map(attribute='metadata.name')|list }}"
 
 - name: 'Display output of "kubeadm join"'
   debug:

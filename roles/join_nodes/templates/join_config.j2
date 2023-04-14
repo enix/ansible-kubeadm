@@ -15,7 +15,7 @@ discovery:
   bootstrapToken:
     token: "{{ token_data['token-id']|b64decode }}.{{ token_data['token-secret']|b64decode }}"
     caCertHashes:
-    - "sha256:{{ ca_info.public_key_fingerprints.sha256.replace(':', '') }}"
+    - "sha256:{{ (ca_info.public_key_fingerprints.sha256|default('dry-run-sha256')).replace(':', '') }}"
 {% if control_plane_endpoint %}
     apiServerEndpoint: "{{ control_plane_endpoint }}"
 {% else %}
