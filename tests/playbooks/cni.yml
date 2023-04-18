@@ -5,12 +5,12 @@
       https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml
     calico: >-
       https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/calico-vxlan.yaml
-    _cni: "{{ cni|default('kube_router') }}"
+    _cni_name: "{{ cni_name|default('calico') }}"
   tasks:
     - name: "Install CNI"
       command: >-
-        kubectl apply -f {{ vars[_cni.replace('-', '_')] }}
-      when: _cni is not false and _cni|trim|length > 0
+        kubectl apply -f {{ vars[_cni_name.replace('-', '_')] }}
+      when: _cni_name is not false and _cni_name|trim|length > 0
       run_once: true
       register: cni_install
 

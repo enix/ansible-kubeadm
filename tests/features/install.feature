@@ -12,7 +12,7 @@ Feature: Install
              controllerManager:
                extraArgs:
                  "allocate-node-cidrs": "true"
-            cni: "kube-router"
+            cni_name: "kube-router"
             kubelet_config:
               cgroupDriver: "systemd"
             kube_version: 1.23
