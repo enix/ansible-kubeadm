@@ -9,7 +9,7 @@
   vars:
     init_config: '{{ _init_config }}'
 
-- name: 'Kubeadm init control init'
+- name: 'Kubeadm init control plane'
   command: >-
     kubeadm init --config {{ kubeadm_config_yaml }}
     {% if enable_kubeadm_patches -%}
@@ -18,3 +18,6 @@
       --experimental-patches {{ kubeadm_patch_dir }}
       {%- endif %}
     {% endif %}
+    {% for error in kubeadm_ignore_preflight_errors %}
+    --ignore-preflight-error={{ error }}
+    {% endfor %}
