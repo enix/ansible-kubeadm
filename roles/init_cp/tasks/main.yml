@@ -19,5 +19,5 @@
       {%- endif %}
     {% endif %}
     {% for error in kubeadm_ignore_preflight_errors %}
-    --ignore-preflight-error={{ error }}
+    --ignore-preflight-errors={{ error }}
     {% endfor %}
