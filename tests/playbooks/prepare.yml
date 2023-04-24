@@ -20,6 +20,17 @@
 
 - hosts: all
   gather_facts: false
+- hosts: all
+  gather_facts: false
+  vars:
+    _cri_name: "{{ cri_name | default('containerd') }}"
+  tasks:
+    - group_by:
+        key: "cri_{{ cri_name | default('containerd') }}"
+      changed_when: false
+
+- hosts: cri_containerd
+  gather_facts: false
   vars:
     _cri_name: "{{ cri_name | default('containerd') }}"
   tasks:
