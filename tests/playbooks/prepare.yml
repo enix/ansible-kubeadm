@@ -26,6 +26,15 @@
 - hosts: all
   gather_facts: false
   vars:
+    _cri_name: "{{ cri_name | default('containerd') }}"
+  tasks:
+    - group_by:
+        key: "cri_{{ cri_name | default('containerd') }}"
+      changed_when: false
+
+- hosts: cri_containerd
+  gather_facts: false
+  vars:
     containerd_sysctl_params:
       net.bridge.bridge-nf-call-iptables: 1
       net.ipv4.ip_forward: 1
@@ -33,7 +42,7 @@
     containerd_module_load:
       - overlay
       - br_netfilter
-  tasks:
+  pre_tasks:
     - name: 'Persist module load'
       copy:
         content: |
@@ -53,18 +62,6 @@
         sysctl_set: true
         sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
       with_dict: '{{ containerd_sysctl_params }}'
-
-- hosts: all
-  gather_facts: false
-  vars:
-    _cri_name: "{{ cri_name | default('containerd') }}"
-  tasks:
-    - group_by:
-        key: "cri_{{ cri_name | default('containerd') }}"
-      changed_when: false
-
-- hosts: cri_containerd
-  gather_facts: false
   roles:
     - role: geerlingguy.containerd
 
