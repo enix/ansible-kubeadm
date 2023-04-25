@@ -64,6 +64,14 @@
       with_dict: '{{ containerd_sysctl_params }}'
   roles:
     - role: geerlingguy.containerd
+  tasks:
+    - name: "Set SytemdCgroup = true"
+      lineinfile:
+        dest: /etc/containerd/config.toml
+        regexp: '(\s+)SystemdCgroup.*'
+        backrefs: true
+        line: '\g<1>SystemdCgroup = true'
+      notify: ['restart containerd']
 
 - hosts: cri_docker
   gather_facts: false
