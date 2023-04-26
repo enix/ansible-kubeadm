@@ -18,6 +18,6 @@ kube_control_plane_cidr="${private_subnet}"
 kubelet_node_ip_cidr="${private_subnet}"
 %{ endif ~}
 fix_dns=true
-ansible_user=ubuntu
+ansible_user="${login_user}"
 ansible_become=true
 ansible_ssh_pipelining=True

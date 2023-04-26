@@ -13,15 +13,10 @@
 - hosts: all
   gather_facts: false
   tasks:
-    - name: "Find cache"
-      find:
-        paths: /var/lib/apt/lists
-      register: apt_lists
-
     - name: "Update cache"
       apt:
         update_cache: yes
-        cache_valid_time: '{{ omit if apt_lists.files | length == 0 else 366000 }}'
+      when: ansible_os_family == 'Debian'
 
 - hosts: all
   gather_facts: false

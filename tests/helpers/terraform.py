@@ -4,6 +4,13 @@ import typing
 
 
 class TerraformCompose:
+    KNOWN_OS = {
+        "debian10": "Debian 10 (Buster) 20210312",
+        "debian11": "Debian 11 (Bullseye) 20211011",
+        "ubuntu2004": "Ubuntu 20.04.4 20230117",
+        "ubuntu2204": "Ubuntu 22.04 20230110",
+    }
+
     def __init__(
         self,
         tfdata_dir: str = ".",
@@ -19,6 +26,7 @@ class TerraformCompose:
         self.envs = envs
         self.mounts = mounts
         self.version = version
+        self._operating_system = None
 
     @property
     def base_command(self):
@@ -40,6 +48,15 @@ class TerraformCompose:
     @property
     def vars(self):
         return VarSetter(self.envs)
+
+    @property
+    def operating_system(self):
+        return self._operating_system
+
+    @operating_system.setter
+    def operating_system(self, operating_system):
+        self.vars["image_name"] = self.KNOWN_OS.get(operating_system, operating_system)
+        self._operating_system = operating_system
 
     def init(self):
         return subprocess.check_call(self.base_command + ["init"])
