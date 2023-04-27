@@ -18,6 +18,9 @@ from tests.helpers.provider import cluster, provider  # noqa: F401, Those are fi
 from tests.helpers.terraform import TerraformCompose
 from tests.helpers.vagrant import LocalVagrant
 
+DEFAULT_OS = ["ubuntu2204"]
+ALL_OS = ["ubuntu2004", "ubuntu2204", "debian11"]
+
 
 def pytest_addoption(parser):
     TRUE_VALUES = ["true", "yes", "y", "1"]
@@ -39,6 +42,22 @@ def pytest_addoption(parser):
         in TRUE_VALUES,
     )
     parser.addoption(
+        "--all-os",
+        dest="os_list",
+        action="store_const",
+        const=ALL_OS,
+        help="Run tests on all known OS",
+    )
+    parser.addoption(
+        "-O",
+        "--os",
+        dest="os_list",
+        nargs="+",
+        action="extend",
+        default=[],
+        help="Select OS to run tests on",
+    )
+    parser.addoption(
         "-A",
         "--ansible",
         dest="ansible_extra_args",
@@ -47,9 +66,18 @@ def pytest_addoption(parser):
     )
 
 
+def pytest_generate_tests(metafunc):
+    if "operating_system" in metafunc.fixturenames:
+        metafunc.parametrize(
+            "operating_system",
+            metafunc.config.getoption("os_list") or DEFAULT_OS,
+            indirect=True,
+        )
+
+
 @pytest.fixture
-def ansible_extra_args(request):
-    return request.config.getoption("ansible_extra_args")
+def operating_system(request, provider):
+    provider.operating_system = request.param
 
 
 @pytest.fixture
@@ -121,6 +149,11 @@ def group_vars(inventory, group, vars_snippet):
 @pytest.fixture()
 def results():
     return {}
+
+
+@pytest.fixture
+def ansible_extra_args(request):
+    return request.config.getoption("ansible_extra_args")
 
 
 @when(

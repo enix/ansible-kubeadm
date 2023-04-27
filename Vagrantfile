@@ -1,7 +1,7 @@
 CONTROL_PLANE_COUNT = (ENV['CONTROL_PLANE_COUNT'] || 2).to_i
 WORKER_COUNT = (ENV['WORKER_COUNT'] || 1).to_i
 SKIP_ANSIBLE = ENV['SKIP_ANSIBLE'] || false
-BOX_IMAGE = ENV['BOX_IMAGE'] || "generic/ubuntu2004"
+BOX_IMAGE = ENV['BOX_IMAGE'] || "generic/ubuntu2204"
 
 Vagrant.configure("2") do |config|
     config.vm.box = BOX_IMAGE

@@ -7,7 +7,7 @@ variable "control_plane_count" {
 }
 
 variable "image_name" {
-  default = "Ubuntu 20.04 20200611"
+  default = "Ubuntu 22.04 20230110"
 }
 
 variable "floating_pool" {

@@ -5,6 +5,8 @@ import vagrant
 
 
 class LocalVagrant:
+    KNOWN_OS = {}
+
     def __init__(self, envs={}, inventory_dir_copy=None):
         self.vagrant = vagrant.Vagrant(quiet_stdout=False, quiet_stderr=False)
         std_envs = dict(os.environ)  # Inherit from current env, not reset it.
@@ -12,6 +14,18 @@ class LocalVagrant:
         std_envs.setdefault("SKIP_ANSIBLE", "true")
         self.inventory_dir_copy = inventory_dir_copy
         self.vagrant.env = std_envs
+        self._operating_system = None
+
+    @property
+    def operating_system(self):
+        return self._operating_system
+
+    @operating_system.setter
+    def operating_system(self, operating_system):
+        self.vars["BOX_IMAGE"] = self.KNOWN_OS.get(
+            operating_system, "generic/{}".format(operating_system)
+        )
+        self._operating_system = operating_system
 
     @property
     def vars(self):

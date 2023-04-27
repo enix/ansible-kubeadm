@@ -21,7 +21,7 @@ def cluster_spawn(provider):
 
 
 @pytest.fixture
-def cluster(request, provider):
+def cluster(request, provider, operating_system):
     try:
         cluster_spawn(provider)
         yield provider.cluster()
