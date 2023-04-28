@@ -27,7 +27,7 @@ For hooks where a variable-per-hook is exposed, see [hooks && plugins](hooks_and
 | apiserver_proxy_stack_dir         | nodes               | "/etc/docker-compose/apiserver-proxy" | directory of docker-compose stack for apiserver_proxy                                                                                                                                                                  |
 | apiserver_proxy_port              | nodes               | 7443                                  | listen port for apiserver_proxy                                                                                                                                                                                        |
 | apiserver_proxy_apiserver_port    | nodes               | 6443                                  | apiserver port targeted by apiserver_proxy                                                                                                                                                                             |
-| apiserver_proxy_use_docker        | nodes               | true                                  | deploy apiserver_proxy via Docker                                                                                                                                                                                      |
+| apiserver_proxy_use_docker        | nodes               | false                                 | deploy apiserver_proxy via Docker                                                                                                                                                                                      |
 | force_apt_update                  | nodes               | false                                 | force source list refresh                                                                                                                                                                                              |
 
 Internal variables:
@@ -39,6 +39,5 @@ Internal variables:
 | _kube_apiserver_advertise_address     | roles               |                          | Interface object|
 | _kube_controller_manager_bind_address | roles               |                          | Interface object|
 | _kube_scheduler_bind_address          | roles               |                          | Interface object|
-| _kubeadm_hooks_*                      | nodes               | []                       | list of files to add to discovered hooks
 | _kubelet_node_ip                      | roles               |                          | Interface object|
 | _apiserver_proxy_haproxy_version      | nodes               | "2.6.*"                  | HAProxy version to install via package for apiserver_proxy |
