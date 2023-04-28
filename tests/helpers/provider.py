@@ -31,22 +31,25 @@ def provider(request):
 
 
 @tenacity.retry(reraise=True, stop=tenacity.stop_after_attempt(2))
-def cluster_spawn(provider):
+def cluster_spawn(provider, keep_servers):
     provider.init()
+    if not keep_servers:
+        provider.destroy()
     provider.apply()
 
 
 @pytest.fixture
 def cluster(request, provider, operating_system):
+    keep_servers = request.config.getoption("keep_servers")
     keep_after_fail = request.config.getoption("keep_servers_after_fail")
     try:
-        cluster_spawn(provider)
+        cluster_spawn(provider, keep_servers)
         yield provider.cluster()
         report = request.node.stash[phase_report_key]
         if "call" in report and report["call"].failed:
             if not keep_after_fail:
                 provider.destroy()
-        elif not request.config.getoption("keep_servers"):
+        elif not keep_servers:
             provider.destroy()
     except Exception:
         if not keep_after_fail:
