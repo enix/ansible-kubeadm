@@ -1,4 +1,5 @@
 ---
+_kubelet_config_path: /var/lib/kubelet/config.yaml
 enable_kubeadm_patches: true
 kubeadm_ignore_preflight_errors: []
 kubeadm_patch_dir: /etc/kubernetes/patches

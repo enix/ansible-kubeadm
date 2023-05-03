@@ -95,8 +95,8 @@ def vagrant(tmpdir):
     return LocalVagrant(inventory_dir_copy=tmpdir)
 
 
-@then("Set cluster {variable}={value}")
-@given("The cluster {variable)={value}")
+@then("Set cluster {variable} = {value}")
+@given("The cluster {variable) = {value}")
 def cluster_set_param(provider, variable, value):
     provider.vars[variable] = value
     # Refresh infrastructure

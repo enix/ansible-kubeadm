@@ -10,6 +10,11 @@
   any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   vars:
     _control_plane: true
+  pre_tasks:
+    - name: 'Fail if not all master in the specified limit'
+      fail:
+        msg: 'Not all control_plane provided, ajust --limit to provid all control_plane'
+      when: groups[kube_cp_group|default("kube_control_plane")]|difference(ansible_play_hosts)|length > 0
   roles:
     - role: find_ip
 

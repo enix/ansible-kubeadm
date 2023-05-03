@@ -82,6 +82,8 @@
         kubeadm_hook_list: ['pre_config_update']
   roles:
     - role: bootstrap_token
+      tags: ['bootstrap_token']
+    - role: upload_certs
     - role: kubeadm_configs_update
   tasks:
     - include_role:
@@ -199,6 +201,7 @@
   hosts: '{{ kube_worker_group|default("kube_workers") }}'
   any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   gather_facts: false
+  tags: ['join']
   pre_tasks:
     - include_role:
         name: hooks_call

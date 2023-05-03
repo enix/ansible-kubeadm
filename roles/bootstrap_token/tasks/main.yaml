@@ -1,83 +1,27 @@
 ---
-- name: 'Select candidate host to run init'
+- name: 'Find nodes to join'
   set_fact:
-    kubeadm_host: '{{ groups.cp_running|default(ansible_play_hosts, true)|first }}'
-
-- name: 'Retrieve a valid bootstrap token'
-  import_tasks: bootstrap_token.yml
-
-- name: 'Create bootstrap token if no valid found'
-  command: kubeadm token create
-  run_once: true
-  delegate_to: '{{ kubeadm_host }}'
-  when: valid_bootstrap_tokens|length == 0
-
-- name: 'Retrieve a valid bootstrap token'
-  import_tasks: bootstrap_token.yml
-  when: valid_bootstrap_tokens|length == 0
-
-# TODO: fix two following tasks to be more platform dependent
-- name: 'Install python-openssl'
-  package:
-    name: >-
-      {%- if ansible_python.version.major > 2 -%}
-         {{ python3_openssl }}
-      {%- else -%}
-         {{ python2_openssl }}
-      {%- endif -%}
-    state: present
-  run_once: true
-  delegate_to: '{{ kubeadm_host }}'
-
-- name: 'Get info from ca'
-  openssl_certificate_info:
-    path: /etc/kubernetes/pki/ca.crt
-  run_once: true
-  delegate_to: '{{ kubeadm_host }}'
-  register: ca_info
-  when: not(groups.cp_init is defined and ansible_check_mode)
-
-- name: 'Display Kubernetes CA(cert) properties'
-  debug:
-    var: ca_info
-    verbosity: 1
+    nodes_to_join: >-
+      {{ q('inventory_hostnames', kube_cp_group ~ ':' ~ kube_worker_group)
+         |map('extract', hostvars)
+         |rejectattr('_kubelet_config_stat.stat.exists')
+         |map(attribute='inventory_hostname')|list }}
   run_once: true
 
-- name: 'List current nodes'
-  kubectl:
-    state: get
-    resource_type: nodes
-    kubeconfig: /etc/kubernetes/admin.conf
-  run_once: true
-  delegate_to: '{{ kubeadm_host }}'
-  register: current_nodes
-  when:
-  - not(found_kubectl.rc == 1 and ansible_check_mode)
+- name: 'Create bootstrap token'
+  when: nodes_to_join|length > 0
+  block:
+    - name: 'Retrieve a valid bootstrap token'
+      import_role:
+        name: bootstrap_token_get
 
-- name: 'Compute list of "to-join" nodes'
-  set_fact:
-    # "items" cannot be defaulted easily as jinja fallback on using method instead
-    to_join_cp: >-
-      {{ ansible_play_hosts|difference(
-        ({"items": []}|combine(current_nodes))["items"]|map(attribute="metadata.name")) }}
-    cert_encryption_key: >-
-      {{ lookup('password', '/dev/null  length=64 chars=hexdigits') }}
-  run_once: true
+    - name: 'Create bootstrap token if no valid found'
+      command: kubeadm token create
+      run_once: true
+      delegate_to: '{{ cp_node }}'
+      when: _valid_bootstrap_tokens|length == 0
 
-- name: 'Display list of node that need to be joined'
-  debug:
-    var: to_join_cp
-    verbosity: 1
-  run_once: true
-
-- name: 'Upload certificates if control-plane node need to be joined'
-  command: >-
-    kubeadm init phase upload-certs
-    --upload-certs
-    --certificate-key {{ cert_encryption_key }}
-  environment:
-    KUBECONFIG: '/etc/kubernetes/admin.conf'
-  no_log: '{{ sensitive_debug|bool }}'
-  run_once: true
-  delegate_to: '{{ kubeadm_host }}'
-  when: to_join_cp|length > 0
+    - name: 'Retrieve a valid bootstrap token'
+      import_role:
+        name: bootstrap_token_get
+      when: _valid_bootstrap_tokens|length == 0
