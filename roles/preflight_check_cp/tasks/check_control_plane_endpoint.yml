@@ -1,0 +1,9 @@
+---
+- name: 'Check if control_plane_endpoint is set for multi-nodes control plane cluster'
+  set_fact:
+    _failure_reasons: >-
+       {{ _failure_reasons|combine(dict(
+            cp_endpoint_multi_nodes = "control_plane_endpoint is not set and you provided multi-nodes control plane.
+                                       You need a reliable way to contact all the apiserver with a single endpoint."
+        )) }}
+  when: not control_plane_endpoint and ansible_play_hosts | length > 1

@@ -1,0 +1,15 @@
+---
+- name: 'Get version of kubelet package'
+  package_facts:
+
+- name: 'Display wanted version of kubeadm'
+  debug:
+    var: target_kubeadm_version
+
+- name: 'Select node for upgrade if kubelet version mismatch'
+  set_fact:
+    _upgrade_reasons: >-
+       {{ _upgrade_reasons|combine(dict(
+            kubelet_version_mismatch = "An upgrade is required for kubelet"
+        )) }}
+  when: packages.kubelet|default([])|rejectattr('version', 'eq', target_kubeadm_version)|list|length > 0

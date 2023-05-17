@@ -27,6 +27,7 @@
   roles:
     - role: find_ip
     - role: preflight_check_nodes
+    - role: process_reasons
   tasks:
     - include_role:
         name: hooks_call

@@ -1,0 +1,27 @@
+---
+- name: 'Test if local kubelet config exists'
+  stat:
+    path: '{{ kubelet_config_path }}'
+  register: _kubelet_config_stat
+
+- name: 'Fetch local kubelet config if exist'
+  slurp:
+    path: '{{ kubelet_config_path }}'
+  register: _kubelet_config_fetch
+  when: _kubelet_config_stat.stat.exists
+
+- name: 'Display kubelet config diff'
+  ansible.utils.fact_diff:
+    # "e30K" means "{}" in base64
+    before: '{{ (_kubelet_config_fetch.content|default("e30K")|b64decode)|from_yaml }}'
+    after: '{{ _kubelet_config_final }}'
+  register: _kubelet_configfile_diff
+  when: _kubelet_config_fetch.content is defined
+
+- name: 'Select node for upgrade if diff is found'
+  set_fact:
+    _upgrade_reasons: >-
+       {{ _upgrade_reasons|combine(dict(
+            kubelet_configfile_diff = _kubelet_configfile_diff.diff_lines
+       )) }}
+  when: _kubelet_configfile_diff.diff_lines|default([])|length > 0

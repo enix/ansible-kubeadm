@@ -1,0 +1,3 @@
+---
+apiserver_manifest: '/etc/kubernetes/manifests/kube-apiserver.yaml'
+kubeconfig_admin: '/etc/kubernetes/admin.conf'

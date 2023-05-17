@@ -3,5 +3,4 @@ _config_upgrade_reasons: {}
 _failure_reasons: {}
 _upgrade_reasons: {}
 
-kube_version:
-default_kube_version: '1.19'
+action_reasons_review_skip: false

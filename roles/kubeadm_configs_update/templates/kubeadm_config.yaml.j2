@@ -1,14 +1,14 @@
 ---
-{{ cluster_config_final|to_nice_yaml(indent=2) }}
-{% if kubelet_config_final != kubelet_config_orig
+{{ _cluster_config_final|to_nice_yaml(indent=2) }}
+{% if _kubelet_config_diff.diff_lines|length > 0
   or groups.cp_running|default([])|length == 0 %}
 ---
-{{ kubelet_config_final|to_nice_yaml(indent=2) }}
+{{ _kubelet_config_final|to_nice_yaml(indent=2) }}
 {% endif %}
-{% if kubeproxy_config_final != kubeproxy_config_orig
+{% if _kubeproxy_config_diff.diff_lines|length > 0
   or groups.cp_running|default([])|length == 0 %}
 ---
-{{ kubeproxy_config_final|to_nice_yaml(indent=2) }}
+{{ _kubeproxy_config_final|to_nice_yaml(indent=2) }}
 {% endif %}
 {% if init_config != {} %}
 ---
