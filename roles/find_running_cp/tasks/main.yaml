@@ -4,7 +4,7 @@
     path: '{{ apiserver_manifest }}'
   register: apiserver_manifest_stat
 
-- name: 'Find if kube-apiserver manifest is present'
+- name: 'Find if kubeconfig admin is present'
   stat:
     path: '{{ kubeconfig_admin }}'
   register: kubeconfig_admin_stat
