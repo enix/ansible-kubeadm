@@ -14,7 +14,6 @@ from tests.helpers.ansible import (
     install_galaxy_deps,
     run_ansible_playbook,
 )
-from tests.helpers.provider import cluster, provider  # noqa: F401, Those are fixtures
 from tests.helpers.terraform import TerraformCompose
 from tests.helpers.vagrant import LocalVagrant
 
@@ -22,8 +21,11 @@ DEFAULT_OS = ["ubuntu2204"]
 ALL_OS = ["ubuntu2004", "ubuntu2204", "debian11"]
 
 
+pytest_plugins = ["tests.helpers.provider"]
+
+
 def pytest_addoption(parser):
-    TRUE_VALUES = ["true", "yes", "y", "1"]
+    TRUE_VALUES = ["true", "yes", "y", "1", True]
     parser.addoption(
         "--keep-servers",
         dest="keep_servers",
@@ -36,7 +38,7 @@ def pytest_addoption(parser):
         "--keep-servers-after-fail",
         dest="keep_servers_after_fail",
         nargs="?",
-        type=bool,
+        type=lambda arg: arg in TRUE_VALUES,
         const=True,
         default=os.environ.get("KEEP_SERVERS_AFTER_FAIL", "true").lower()
         in TRUE_VALUES,
