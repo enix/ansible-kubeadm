@@ -16,6 +16,12 @@
         {%- else -%}
           {{ python2_docker }}
         {%- endif -%}
+    install_recommends: >- # docker-compose breaks docker as it recommends docker.io on debian 11 (at least)
+      {%- if ansible_pkg_mgr == "apt" -%}
+         false
+      {%- else -%}
+        {{ omit }}
+      {%- endif -%}
     state: present
   register: compose_installed
 
