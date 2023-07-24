@@ -18,4 +18,4 @@ RUN pip3 install --no-cache poetry==1.3.2
 
 COPY --from=docker /usr/local/bin/docker /usr/local/bin/docker
 # docker-compose and docker-buildx (unused)
-COPY --from=docker /usr/libexec/docker/cli-plugins/ /usr/libexec/docker/cli-plugins/
+COPY --from=docker /usr/local/libexec/docker/cli-plugins/ /usr/local/libexec/docker/cli-plugins/
