@@ -17,8 +17,8 @@ from tests.helpers.ansible import (
 from tests.helpers.terraform import TerraformCompose
 from tests.helpers.vagrant import LocalVagrant
 
-DEFAULT_OS = ["ubuntu2204"]
-ALL_OS = ["ubuntu2004", "ubuntu2204", "debian11"]
+DEFAULT_OS = ["Ubuntu22.04"]
+ALL_OS = ["Ubuntu20.04", "Ubuntu22.04", "Debian11"]
 
 
 pytest_plugins = ["tests.helpers.provider"]
