@@ -42,4 +42,4 @@ Long term migration plan, [*] to indicate current phase
 
 ## Tips and Tricks
 
-[Tips&Tricks](tips_tricks.md)
+[Tips&Tricks](docs/tips_tricks.md)
