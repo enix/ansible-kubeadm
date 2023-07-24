@@ -27,10 +27,19 @@ node-3
 If you don't have provision a load-balancer and require the local haproxy to be deployed:
 
 ```
-ansible-playbook -i inventory enix.kubeadm.00_apiserver_proxy -l kube_control_plane:nodes-3
+ansible-playbook -i inventory enix.kubeadm.00_apiserver_proxy -e limit=nodes-3
 ```
-You can skip the `-l` argument, if you're cluster doesn't have pending change you want to preserve on other nodes.
-Don't forget to put all control_plane or it will fail to provision the apiserver proxy
+You need to specify the `limit` variable via "extra-vars", because `-l` cannot really work in the context of ansible-kubeadm
+(you need to connect to all the masters to get the IP needed to configure the loadbalancer)
+
+### Joining nodes
+
+You can join a node and skip other changes on other nodes by specify the limit variable.
+
+```
+ansible-play -i inventory.cfg enix.kubeadm.01_site -e limit=nodes-3
+```
+
 
 
 ### Create bootstrap-token
@@ -45,26 +54,3 @@ ansible-playbook -i inventory.cfg enix.kubeadm.01_site -t bootstrap_token
 No need to retrieve it by yourself, it will be discovered when joining the node
 The token has a validity of 1H, so you don't need to repeat this step each time you try to join nodes
 
-### Joining nodes
-
-You can join a node and skip other changes to the cluster by using the `join` tag.
-With the tag, you can limit to hosts you want to join.
-
-```
-ansible-play -i inventory.cfg enix.kubeadm.01_site -t join -l nodes-3
-```
-
-## Alternative method
-
-You can merge the creation of the boostrap token with the joining of the action of join:
-
-```
-ansible-playbook -i inventory.cfg enix.kubeadm.01_site -t bootstap_token,join -l kube_control_plane:node-3
-```
-
-Please note that you need to include a least one control plane node in the limit host pattern,
-You can also skip the limit host pattern to apply to all nodes as those step are indempotent on their own: it will not mess with the current nodes.
-
-# To join control-plane nodes
-
-There is no tag for this operation, you need to apply the entire playbook for this

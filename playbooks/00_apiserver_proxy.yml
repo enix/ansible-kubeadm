@@ -10,15 +10,10 @@
   any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   vars:
     _control_plane: true
-  pre_tasks:
-    - name: 'Fail if not all master in the specified limit'
-      fail:
-        msg: 'Not all control_plane provided, ajust --limit to provid all control_plane'
-      when: groups[kube_cp_group|default("kube_control_plane")]|difference(ansible_play_hosts)|length > 0
   roles:
     - role: find_ip
 
-- hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}{{ ":" ~ limit if limit is defined else "" }}'
   any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   pre_tasks:
     - include_role:
@@ -36,7 +31,7 @@
       vars:
         kubeadm_hook_list: ['post_apiserver_proxy']
 
-- hosts: 'haproxy_upgrade_group:&{{ kube_cp_group|default("kube_control_plane") }}'
+- hosts: 'haproxy_upgrade_group:&{{ kube_cp_group|default("kube_control_plane") }}{{ ":" ~ limit if limit is defined else "" }}'
   serial: '{{ upgrade_cp_serial|default(1) }}'
   any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   pre_tasks:
@@ -52,7 +47,7 @@
       vars:
         kubeadm_hook_list: ['post_proxy_upgrade_haproxy']
 
-- hosts: 'haproxy_upgrade_group:&{{ kube_worker_group|default("kube_workers") }}'
+- hosts: 'haproxy_upgrade_group:&{{ kube_worker_group|default("kube_workers") }}{{ ":" ~ limit if limit is defined else "" }}'
   serial: '{{ upgrade_worker_serial|default(1) }}'
   any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   pre_tasks:

@@ -15,7 +15,7 @@
     kubeadm init phase upload-certs
     --upload-certs
     --certificate-key {{ cert_encryption_key }}
-  no_log: '{{ sensitive_debug|bool }}'
+  no_log: '{{ not sensitive_debug|bool }}'
   run_once: true
   delegate_to: '{{ cp_node }}'
   when: _cp_to_join|length > 0

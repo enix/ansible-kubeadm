@@ -4,6 +4,7 @@
     nodes_to_join: >-
       {{ q('inventory_hostnames', kube_cp_group ~ ':' ~ kube_worker_group)
          |map('extract', hostvars)
+         |selectattr('_kubelet_config_stat', 'defined')
          |rejectattr('_kubelet_config_stat.stat.exists')
          |map(attribute='inventory_hostname')|list }}
   run_once: true

@@ -1,19 +1,4 @@
 ---
 dependencies:
   - role: packages_common
-galaxy_info:
-  author: Julien Girardin
-  description: Install kubernetes related packages
-  company: Enix
-  license: Apache
-  min_ansible_version: 2.7
-  platforms:
-    - name: Ubuntu
-      versions:
-        - 18.04
-        - 20.04
-  galaxy_tags:
-    - kubernetes
-    - kubeadm
-    - kubelet
-    - kubectl
+  - role: common_vars

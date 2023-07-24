@@ -3,6 +3,7 @@ import os
 import re
 
 import ansible_runner
+import ansible_runner.interface
 
 
 def install_ansible(virtualenv, version=None):
@@ -23,20 +24,15 @@ def install_galaxy_deps(virtualenv):
             "install",
             "-r",
             os.path.join(test_dir, "ansible.requirements.yml"),
-            "-p",
-            os.path.join(test_dir, "playbooks/roles"),
         ]
     )
 
 
 def run_ansible_playbook(
-    virtualenv, playbooks, dry_run=False, ansible_extra_args=None, **kwargs
+    virtualenv, inventory, arguments, dry_run=False, ansible_extra_args=None, **kwargs
 ):
-    if isinstance(playbooks, str):
-        playbooks = [playbooks]
-    playbooks = [
-        os.path.join(os.path.dirname(__file__), "../..", pbk) for pbk in playbooks
-    ]
+    if isinstance(arguments, str):
+        arguments = [arguments]
     # ansible_runner has several "bugs":
     # - Don't accept multiple playbooks on the parameter "playbook" (which is supposed to accept list)
     # - If you pass custom binary it cannot say if ansible or ansible-playbook so doesn't inject playbook anymore
@@ -44,15 +40,21 @@ def run_ansible_playbook(
     envvars = dict(os.environ)
     envvars.setdefault("ANSIBLE_HOST_KEY_CHECKING", "false")
     envvars.setdefault("ANSIBLE_FORCE_COLOR", "true")
-    cmdline = " ".join(itertools.chain(ansible_extra_args or [], playbooks))
+    cmdline_args = [
+        "-i",
+        inventory,
+        *itertools.chain(arguments, ansible_extra_args or []),
+    ]
     if dry_run:
-        cmdline += " -C"
-    return ansible_runner.run(
-        binary=os.path.join(virtualenv.virtualenv, "bin/ansible-playbook"),
-        cmdline=cmdline,
+        cmdline_args += ["-C"]
+    runner = ansible_runner.interface.init_command_config(
+        executable_cmd=os.path.join(virtualenv.virtualenv, "bin/ansible-playbook"),
+        cmdline_args=cmdline_args,
         envvars=envvars,
         **kwargs
     )
+    runner.run()
+    return runner
 
 
 def assert_ansible_error(run):
