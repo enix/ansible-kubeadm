@@ -1,15 +1,11 @@
 import json
+import re
 import subprocess
 import typing
 
 
 class TerraformCompose:
-    KNOWN_OS = {
-        "debian10": "Debian 10 (Buster) 20210312",
-        "debian11": "Debian 11 (Bullseye) 20211011",
-        "ubuntu2004": "Ubuntu 20.04.4 20230117",
-        "ubuntu2204": "Ubuntu 22.04 20230110",
-    }
+    KNOWN_OS = {}
 
     def __init__(
         self,
@@ -55,7 +51,8 @@ class TerraformCompose:
 
     @operating_system.setter
     def operating_system(self, operating_system):
-        self.vars["image_name"] = self.KNOWN_OS.get(operating_system, operating_system)
+        formated_name = " ".join(re.findall(r"([a-zA-Z]+|[-\d.]+)", operating_system))
+        self.vars["image_name"] = self.KNOWN_OS.get(operating_system, formated_name)
         self._operating_system = operating_system
 
     def init(self):

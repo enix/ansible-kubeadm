@@ -11,3 +11,8 @@ resource "openstack_compute_keypair_v2" "ssh_deploy" {
   name       = var.stem
   public_key = data.local_file.ssh_key.content
 }
+
+data "openstack_images_image_v2" "image_name" {
+  name_regex  = "${var.image_name}.*"
+  most_recent = true
+}

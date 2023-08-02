@@ -5,7 +5,7 @@ resource "openstack_compute_servergroup_v2" "cp_group" {
 
 resource "openstack_compute_instance_v2" "control_plane" {
   name            = "${var.stem}-cp-${count.index + 1}"
-  image_name      = var.image_name
+  image_id        = data.openstack_images_image_v2.image_name.id
   flavor_name     = "GP2.2"
   key_pair        = openstack_compute_keypair_v2.ssh_deploy.name
   security_groups = ["default", openstack_compute_secgroup_v2.kubeadm.name]

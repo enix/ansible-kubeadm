@@ -22,9 +22,8 @@ class LocalVagrant:
 
     @operating_system.setter
     def operating_system(self, operating_system):
-        self.vars["BOX_IMAGE"] = self.KNOWN_OS.get(
-            operating_system, "generic/{}".format(operating_system)
-        )
+        formated_name = "generic/{}".format(operating_system.replace(".", "").lower())
+        self.vars["BOX_IMAGE"] = self.KNOWN_OS.get(operating_system, formated_name)
         self._operating_system = operating_system
 
     @property
