@@ -1,9 +1,9 @@
 - name: 'find version of kubeadm to install'
   pkg_version_match:
     name: kubeadm
-    version: '{{ target_kubeadm_version }}'
+    version: '{{ _target_kubeadm_version }}'
   when:
-    - target_kubeadm_version is defined
+    - _target_kubeadm_version is defined
     - not(kube_repo_just_added is changed and ansible_check_mode)
   register: kubeadm_version
 

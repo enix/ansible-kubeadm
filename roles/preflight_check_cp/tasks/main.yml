@@ -13,36 +13,21 @@
 # Last fallback is the default version, if no cluster running
 - name: 'Export variable for other hosts'
   set_fact:
-    target_kube_version: '{{ _kube_version }}'
-    target_kubeadm_version: '{{ _kubeadm_version }}'
+    _target_kubeadm_version: '{{ _kubeadm_version }}'
   vars:
-    _kube_version: >-
-      {%- if _current_cp_version -%}
-        {%- if _current_cp_version|regex_search(kube_version ~ '.*') or not kube_version -%}
-           {{ _current_cp_version }}
-        {%- else -%}
-           {{ kube_version|default(default_kube_version, true) }}
-        {%- endif -%}
-      {%- else -%}
-        {{ kube_version|default(default_kube_version, true) }}
-      {%- endif -%}
     _kubeadm_version: >-
       {%- set kubeadm_match = ansible_play_hosts
            |map('extract', hostvars, ['packages', 'kubeadm', 0, 'version'])
-           |map('default')|select('match', _kube_version ~ '.*')|list -%}
+           |map('default')|select('match', _target_kube_version ~ '.*')|list -%}
       {%- if kubeadm_match|length > 0 -%}
         {{ kubeadm_match|first }}
       {%- else -%}
-        {{ _kube_version }}
+        {{ _target_kube_version }}
       {%- endif -%}
-
-- name: 'Display wanted version of kuberbenetes'
-  debug:
-    var: target_kube_version
 
 - name: 'Display wanted version of kubeadm'
   debug:
-    var: target_kubeadm_version
+    var: _target_kubeadm_version
 
 - import_tasks: check_version.yml
 
