@@ -1,8 +1,8 @@
 ---
 - name: 'Check that version upgrade is one step'
   set_fact:
-    _failure_reason: >-
-      {{ _failure_reason|combine(dict(
+    _failure_reasons: >-
+      {{ _failure_reasons|combine(dict(
             version_skew_error = "Version upgrade is not allowed: " ~ _current_cp_version ~ " => " ~ _target_kube_version
        )) }}
   when:
