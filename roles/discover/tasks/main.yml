@@ -1,10 +1,13 @@
 ---
 - name: 'List all nodes'
-  command: >-
-    kubectl get nodes -o yaml
+  command: kubectl get nodes -o yaml
+  environment:
+    KUBECONFIG: '/etc/kubernetes/admin.conf'
   changed_when: false
   check_mode: false
   register: all_nodes_cmd
+  environment:
+    KUBECONFIG: '/etc/kubernetes/admin.conf'
 
 - name: 'Display output of "kubectl get nodes"'
   debug:
