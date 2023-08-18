@@ -75,6 +75,8 @@
     kubeadm init phase upload-certs
     --upload-certs
     --certificate-key {{ cert_encryption_key }}
+  environment:
+    KUBECONFIG: '/etc/kubernetes/admin.conf'
   no_log: '{{ sensitive_debug|bool }}'
   run_once: true
   delegate_to: '{{ kubeadm_host }}'

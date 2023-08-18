@@ -1,6 +1,8 @@
 ---
 - name: 'Plan upgrade'
   command: kubeadm upgrade plan {{ kubeadm_version.version.split( '-' )|first }}
+  environment:
+    KUBECONFIG: '/etc/kubernetes/admin.conf'
   register: plan_upgrade
 
 - name: 'Display result of "kubectl upgrade plan"'

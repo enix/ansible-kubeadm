@@ -11,9 +11,10 @@
   wait_for_connection:
   when: reboot_node|bool
 
-
 - name: 'Uncordon node'
   command: kubectl uncordon {{ ansible_nodename }}
+  environment:
+    KUBECONFIG: '/etc/kubernetes/admin.conf'
   retries: 4
   register: uncordon_nodes
   until: uncordon_nodes is not failed
