@@ -13,6 +13,12 @@
 - name: 'refresh source list'
   apt:
     update_cache: true
+    cache_valid_time: >-
+      {{ omit
+         if force_update or repo_refresh_time|int < 0
+         else
+         repo_refresh_time|int }}
   when: >-
-    kube_repo_just_added is changed
-    or force_apt_update|bool
+    repo_refresh_time|int >= 0 or force_update
+  vars:
+    force_update: '{{ force_apt_update|bool or kube_repo_just_added is changed }}'

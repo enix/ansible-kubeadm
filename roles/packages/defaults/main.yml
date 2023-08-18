@@ -8,3 +8,4 @@ enforce_version: true
 
 force_apt_update: false
 pause_before_kube_pkg_install: false
+repo_refresh_time: 86400 # 1 day
