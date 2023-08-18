@@ -1,6 +1,11 @@
 ---
 default_kubeadm_config:
-  apiVersion: kubeadm.k8s.io/v1beta2
+  apiVersion: >-
+    {%- if _target_kube_version is version("1.22", ">=") -%}
+      kubeadm.k8s.io/v1beta3
+    {%- else -%}
+      kubeadm.k8s.io/v1beta2
+    {%- endif -%}
   kind: ClusterConfiguration
 
 default_kubelet_config:

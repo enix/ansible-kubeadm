@@ -1,28 +1,27 @@
 ---
 - name: 'Check that version upgrade is one step'
   set_fact:
-    _failure_reason: >-
-      {{ _failure_reason|combine(dict(
-            version_skew_error = "Version upgrade is not allowed: " ~ _current_cp_version ~ " => " ~ target_kube_version
+    _failure_reasons: >-
+      {{ _failure_reasons|combine(dict(
+            version_skew_error = "Version upgrade is not allowed: " ~ _current_cp_version ~ " => " ~ _target_kube_version
        )) }}
   when:
     - _current_cp_version|length > 0
-    - (current_major != target_major) or (current_minor|int - target_minor|int)|abs > 1
+    - (_current_major != _target_major) or (_current_minor|int - _target_minor|int)|abs > 1
   vars:
-    current_version_split: '{{ (_current_cp_version|regex_findall("(?:\d+)"))[0:2] }}'
-    current_major: '{{ current_version_split|first }}'
-    current_minor: '{{ current_version_split|last }}'
-    target_version_split: '{{ (target_kube_version|regex_findall("(?:\d+)"))[0:2] }}'
-    target_major: '{{ target_version_split|first }}'
-    target_minor: '{{ target_version_split|last }}'
-
+    _current_version_split: '{{ (_current_cp_version|regex_findall("(?:\d+)"))[0:2] }}'
+    _current_major: '{{ _current_version_split|first }}'
+    _current_minor: '{{ _current_version_split|last }}'
+    _target_version_split: '{{ (_target_kube_version|regex_findall("(?:\d+)"))[0:2] }}'
+    _target_major: '{{ _target_version_split|first }}'
+    _target_minor: '{{ _target_version_split|last }}'
 
 - name: 'Trigger upgrade if targeted version is different from current version'
   set_fact:
     _config_upgrade_reasons: >-
       {{ _config_upgrade_reasons|combine(dict(
-            upgrade_version = _current_cp_version ~ " != " ~ target_kube_version
+            upgrade_version = _current_cp_version ~ " != " ~ _target_kube_version
         )) }}
   when:
     - _current_cp_version|length > 0
-    - not(_current_cp_version|regex_search(target_kube_version ~ '.*'))
+    - not(_current_cp_version|regex_search(_target_kube_version ~ '.*'))

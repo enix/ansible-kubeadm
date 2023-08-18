@@ -1,7 +1,7 @@
 Feature: Upgrade
     A test to upgrade a kubeadm cluster
 
-    Scenario: Upgrade via ansible-kubeadm
+    Scenario Outline: Upgrade via ansible-kubeadm
         Given I want ansible 3
         Given Some running VMs
 
@@ -15,15 +15,19 @@ Feature: Upgrade
             kubelet_config:
               cgroupDriver: "systemd"
             apiserver_proxy_use_docker: false
-            kube_version: 1.23
+            kube_version: <from_version>
             action_reasons_review_skip: true
         When I run the playbook tests/playbooks/prepare.yml
         When I run the playbooks 00_apiserver_proxy.yml
                                  01_site.yml
         When I run the playbook tests/playbooks/cni.yml
 
-        When With those group_vars on group all: kube_version: 1.24
+        When With those group_vars on group all: kube_version: <to_version>
         When I run the playbooks 00_apiserver_proxy.yml
                                  01_site.yml
 
         Then I should have a working cluster
+
+        Examples:
+        | from_version | to_version |
+        | 1.21         | 1.22       |

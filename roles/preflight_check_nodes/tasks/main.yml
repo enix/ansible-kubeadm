@@ -1,8 +1,8 @@
 ---
 - name: 'Retrieve variable from control-plane'
   set_fact:
-    target_kube_version: '{{ hostvars[cp_node].target_kube_version }}'
-    target_kubeadm_version: '{{ hostvars[cp_node].target_kubeadm_version }}'
+    _target_kube_version: '{{ hostvars[cp_node]._target_kube_version }}'
+    _target_kubeadm_version: '{{ hostvars[cp_node]._target_kubeadm_version }}'
     _kubelet_config_final: '{{ hostvars[cp_node]._kubelet_config_final }}'
 
 - import_tasks: check_kubelet_version.yml

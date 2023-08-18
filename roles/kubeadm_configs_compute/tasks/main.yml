@@ -108,6 +108,9 @@
             {{ _in_cluster_kubeproxy_config.stdout|from_yaml }}
           {%- endif -%}
 
+    - name: 'Display wanted version of kuberbenetes'
+      debug:
+        var: _target_kube_version
 
     - name: 'Display computed "control_plane_endpoint'
       debug:
@@ -137,6 +140,18 @@
           {{ _kubelet_config_orig|default(default_kubelet_config, true)|combine(kubelet_config, recursive=true) }}
         _kubeproxy_config_final: >-
           {{ _kubeproxy_config_orig|default(default_kubeproxy_config, true)|combine(kubeproxy_config, recursive=true) }}
+        _target_kube_version: '{{ _target_kube_version }}'
+      vars:
+        _target_kube_version: >-
+          {%- if _current_cp_version -%}
+            {%- if _current_cp_version|regex_search(kube_version ~ '.*') or not kube_version -%}
+              {{ _current_cp_version }}
+            {%- else -%}
+              {{ kube_version|default(default_kube_version, true) }}
+            {%- endif -%}
+          {%- else -%}
+            {{ kube_version|default(default_kube_version, true) }}
+          {%- endif -%}
 
     - name: 'Make diff cluster_config'
       ansible.utils.fact_diff:

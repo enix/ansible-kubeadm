@@ -35,8 +35,8 @@
   command: >-
     kubeadm join --config=/dev/stdin
     {% if _control_plane and enable_kubeadm_patches|bool -%}
-      {% if target_kube_version is version("1.22", ">=") -%}
-      {% elif target_kube_version is version("1.19", ">=") -%}
+      {% if _target_kube_version is version("1.22", ">=") -%}
+      {% elif _target_kube_version is version("1.19", ">=") -%}
       --experimental-patches {{ kubeadm_patch_dir }}
       {%- endif %}
     {%- endif -%}

@@ -3,7 +3,7 @@
   assert:
     that:
       # enforce_version implies that _kube_version is defined
-      - enforce_version|bool <= (target_kubeadm_version is defined)
+      - enforce_version|bool <= (_target_kubeadm_version is defined)
 
 - name: 'Include OS specific variables'
   include_vars: '{{ item }}'

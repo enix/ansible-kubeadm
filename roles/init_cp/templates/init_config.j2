@@ -1,5 +1,5 @@
 ---
-{% if target_kube_version is version("1.22", ">=") -%}
+{% if _target_kube_version is version("1.22", ">=") -%}
 apiVersion: kubeadm.k8s.io/v1beta3
 {% else %}
 apiVersion: kubeadm.k8s.io/v1beta2
@@ -14,7 +14,7 @@ nodeRegistration:
   kubeletExtraArgs:
     node-ip: {{ _kubelet_node_ip.ipv4.address }}
 {% endif %}
-{% if enable_kubeadm_patches and target_kube_version is version("1.22", ">=") -%}
+{% if enable_kubeadm_patches and _target_kube_version is version("1.22", ">=") -%}
 patches:
   directory: {{ kubeadm_patch_dir }}
 {%- endif %}
