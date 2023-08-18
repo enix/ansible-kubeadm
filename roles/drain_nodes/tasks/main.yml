@@ -1,4 +1,8 @@
 ---
+- name: 'Pause before drain'
+  pause:
+  when: pause_before_drain|bool
+
 - name: 'Drain node if needed'
   command: >-
     kubectl drain
@@ -13,7 +17,7 @@
   delegate_to: '{{ cp_node }}'
   when: drain_node|bool
   notify:
-  - Pause after drain
+  - Pause after upgrade
   - Reboot node
   - Wait for node
   - Uncordon node

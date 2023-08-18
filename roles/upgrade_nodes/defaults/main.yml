@@ -1,2 +1,2 @@
 ---
-drain: true
+pause_before_upgrade: false
