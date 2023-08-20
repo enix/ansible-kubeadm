@@ -40,6 +40,7 @@ For hooks where a variable-per-hook is exposed, see [hooks && plugins](hooks_and
 | pause_before_drain                | nodes               | false                                           | Pause before the drain of the node                                                                                                                                                                                        |
 | pause_before_upgrade              | nodes               | false                                           | Pause before the upgrade of the node                                                                                                                                                                                      |
 | pause_after_drain_and_node_upgrade| nodes               | false                                           | Pause after the upgrade of the node in case of a drain. Use hook if you need to run pause after upgrade unconditionnaly                                                                                                   |
+| repo_refresh_time                 | nodes               | 86400 (1 day)                                   | Number of second after which the apt/yum cache is not considered up to date, and forced to be refresh. Set to -1 to not update the repo automatically. Set to 0 for forcing refresh (same as force_apt_update).           |
 
 Internal variables:
 
