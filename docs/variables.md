@@ -37,6 +37,7 @@ For hooks where a variable-per-hook is exposed, see [hooks && plugins](hooks_and
 | apiserver_proxy_use_docker        | nodes               | false                                           | deploy apiserver_proxy via Docker. When false use haproxy for loadbalancer                                                                                                                                                |
 | force_apt_update                  | nodes               | false                                           | force source list refresh                                                                                                                                                                                                 |
 | kubeadm_plugins_dir               | nodes               | "{{ inventory_dir }}"                           | directory where to look for hooks. (Not directly, in a `kubeadm.<hok_name>.d` subfolder                                                                                                                                   |
+| repo_refresh_time                 | nodes               | 86400 (1 day)                                   | Number of second after which the apt/yum cache is not considered up to date, and forced to be refresh. Set to -1 to not update the repo automatically. Set to 0 for forcing refresh (same as force_apt_update).           |
 
 Internal variables:
 
