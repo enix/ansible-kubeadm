@@ -1,4 +1,8 @@
 ---
+- name: 'Pause before upgrade'
+  pause:
+  when: pause_before_upgrade|bool
+
 - name: 'Apply upgrade'
   command: >-
     kubeadm upgrade node

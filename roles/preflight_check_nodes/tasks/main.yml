@@ -1,4 +1,9 @@
 ---
+- name: 'Check deprecated variable'
+  fail:
+    msg: 'do not use "pause_after_drain" variable, use "pause_after_drain_and_node_upgrade"'
+  when: pause_after_drain is defined
+
 - name: 'Retrieve variable from control-plane'
   set_fact:
     _target_kube_version: '{{ hostvars[cp_node]._target_kube_version }}'

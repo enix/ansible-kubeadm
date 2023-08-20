@@ -1,7 +1,7 @@
 ---
-- name: 'Pause after drain'
+- name: 'Pause after upgrade'
   pause:
-  when: pause_after_drain|bool
+  when: pause_after_drain_and_node_upgrade|bool
 
 - name: 'Reboot node'
   reboot:
