@@ -1,11 +1,13 @@
 ---
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   gather_facts: false
   tags: ['always', 'plugins']
   roles:
     - role: hooks_plugins_register
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   pre_tasks:
     - include_role:
         name: hooks_call
@@ -24,6 +26,7 @@
         kubeadm_hook_list: ['post_preflight_cp']
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   roles:
     - role: find_ip
     - role: preflight_check_nodes
@@ -35,6 +38,7 @@
         kubeadm_hook_list: ['post_preflight_nodes']
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   gather_facts: false
   roles:
     - role: control_plane_patches
@@ -45,6 +49,7 @@
       kubeadm_hook_list: ['post_first_tasks_cp']
 
 - hosts: cp_init
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   gather_facts: false
   vars:
     _control_plane: true
@@ -53,7 +58,6 @@
         name: hooks_call
       vars:
         kubeadm_hook_list: ['pre_init']
-
   roles:
     - role: packages
     - role: init_cp
@@ -64,6 +68,7 @@
         kubeadm_hook_list: ['post_init']
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   gather_facts: false
   pre_tasks:
     - include_role:
@@ -81,6 +86,7 @@
 
 # This has to be overly cautious on package upgade
 - hosts: cp_upgrade
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   gather_facts: false
   pre_tasks:
     - include_role:
@@ -106,6 +112,7 @@
 # Upgrade conrol-plane nodes
 - name: 'Upgrade to control plane nodes'
   hosts: '{{ kube_cp_group|default("kube_control_plane") }}:&nodes_upgrade'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   serial: '{{ upgrade_cp_serial|default(1) }}'
   gather_facts: false
   vars:
@@ -134,6 +141,7 @@
 # Upgrade worker nodes
 - name: 'Upgrade to workers nodes'
   hosts: '{{ kube_worker_group|default("kube_workers") }}:&nodes_upgrade'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   serial: '{{ upgrade_worker_serial|default(1) }}'
   gather_facts: false
   pre_tasks:
@@ -160,6 +168,7 @@
 # Join control-plane nodes
 - name: 'Join new control plane nodes'
   hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   gather_facts: false
   vars:
     _control_plane: true
@@ -183,6 +192,7 @@
 # Join worker nodes
 - name: 'Join new workers nodes'
   hosts: '{{ kube_worker_group|default("kube_workers") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   gather_facts: false
   pre_tasks:
     - include_role:
@@ -201,6 +211,7 @@
 
 - name: 'Finally executing post_run hook on all hosts'
   hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   gather_facts: false
   tasks:
     - include_role:

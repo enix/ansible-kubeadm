@@ -1,17 +1,20 @@
 ---
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
   gather_facts: false
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   tags: ['always', 'plugins']
   roles:
     - role: hooks_plugins_register
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   vars:
     _control_plane: true
   roles:
     - role: find_ip
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   pre_tasks:
     - include_role:
         name: hooks_call
@@ -30,6 +33,7 @@
 
 - hosts: 'haproxy_upgrade_group:&{{ kube_cp_group|default("kube_control_plane") }}'
   serial: '{{ upgrade_cp_serial|default(1) }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   pre_tasks:
     - include_role:
         name: hooks_call
@@ -45,6 +49,7 @@
 
 - hosts: 'haproxy_upgrade_group:&{{ kube_worker_group|default("kube_workers") }}'
   serial: '{{ upgrade_worker_serial|default(1) }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
   pre_tasks:
     - include_role:
         name: hooks_call
