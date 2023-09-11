@@ -1,6 +1,31 @@
 ---
+- name: 'Get version of kubelet package'
+  package_facts:
+
+- name: 'find version of kubeadm to install'
+  pkg_version_match:
+    name: haproxy
+    version: '{{ _apiserver_proxy_haproxy_version }}'
+  when:
+    - not(haproxy_repo_just_added is changed and ansible_check_mode)
+    - packages.haproxy|default([])|select('match', _apiserver_proxy_haproxy_version)|list|length == 0
+  register: haproxy_version
+
+- name: "Create pinning files"
+  copy:
+    dest: /etc/apt/preferences.d/50-haproxy
+    content: |
+      package: haproxy
+      Pin: version {% if haproxy_version is not skipped -%}
+        {{ haproxy_version.version }}
+      {%- else -%}
+        {{ packages.haproxy.0.version|default('dry-run-unknown') }}
+      {%- endif %}
+
+      Pin-Priority: 1001
+
 - name: 'Install HAProxy package'
   apt:
-    name: 'haproxy={{ _apiserver_proxy_haproxy_version }}'
+    name: 'haproxy'
     state: 'present'
   when: not(haproxy_repo_just_added is changed and ansible_check_mode)
