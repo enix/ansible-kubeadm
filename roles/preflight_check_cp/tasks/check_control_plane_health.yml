@@ -1,0 +1,28 @@
+---
+- name: 'get kubeadm configmap if cluster running'
+  command: kubectl get nodes -o yaml
+  changed_when: false
+  check_mode: false
+  register: _all_nodes_yaml
+  environment:
+    KUBECONFIG: '{{ kubeconfig_admin }}'
+
+- name: 'Check control-plane health'
+  set_fact:
+    _failure_reasons: >-
+      {%- set cp_unhealthy = [] -%}
+      {%- for node in (_all_nodes_yaml.stdout|from_yaml)['items']
+              if 'node-role.kubernetes.io/control-plane' in node.metadata.labels -%}
+          {%- if node.status.conditions|selectattr("type", "eq", "Ready")
+                                       |rejectattr("status", "eq", "True")|list|length > 0 -%}
+
+            {%- set _ = cp_unhealthy.append(node.metadata.name) -%}
+         {%- endif -%}
+      {%- endfor -%}
+      {%- if cp_unhealthy|length > 0 -%}
+          {%- set _ = _failure_reasons.update(dict(
+              control_plane_unhealthy=cp_unhealthy
+          )) -%}
+      {%- endif -%}
+      {{ _failure_reasons }}
+  when: not cp_health_check_bypass|bool

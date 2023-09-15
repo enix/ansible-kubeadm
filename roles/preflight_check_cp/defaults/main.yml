@@ -2,6 +2,7 @@
 _config_upgrade_reasons: {}
 _failure_reasons: {}
 _upgrade_reasons: {}
+cp_health_check_bypass: false
 
 kube_version:
 default_kube_version: '1.19'
