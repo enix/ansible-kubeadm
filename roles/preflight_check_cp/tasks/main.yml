@@ -32,3 +32,10 @@
 - import_tasks: check_version.yml
 
 - import_tasks: check_control_plane_endpoint.yml
+
+- import_tasks: check_control_plane_health.yml
+  run_once: true
+  delegate_to: '{{ groups.cp_running|first }}'
+  when:
+    - groups.cp_running|default([])|length > 0
+    - not cp_health_check_bypass|bool
