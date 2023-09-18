@@ -4,7 +4,7 @@
     version: '{{ _target_kubeadm_version }}'
   when:
     - _target_kubeadm_version is defined
-    - not(kube_repo_just_added is changed and ansible_check_mode)
+    - not(_kube_repo_just_added is changed and ansible_check_mode)
   register: kubeadm_version
 
 - name: 'Display of complete version of kubeadm'
