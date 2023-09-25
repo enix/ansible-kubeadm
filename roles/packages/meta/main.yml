@@ -1,5 +1,6 @@
 ---
-dependencies: []
+dependencies:
+  - role: packages_common
 galaxy_info:
   author: Julien Girardin
   description: Install kubernetes related packages
