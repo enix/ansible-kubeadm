@@ -12,7 +12,7 @@ ansible-playbook -i <on_master_ip_look_at_comma_after>, -b -k -u admin playbooks
 
 ```
 export OS_CLOUD=openstack  # and any other openstack environment variable
-docker compose run tests -k install --keep-servers -A -e kube_version=1.25
+docker compose run dev -e kube_version=1.25
 ```
 
 A bit of explanations:
