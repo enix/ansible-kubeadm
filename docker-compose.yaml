@@ -4,6 +4,7 @@ services:
     image: hashicorp/terraform:${TERRAFORM_VERSION:-1.3.6}
     working_dir: "${PWD}/tests/terraform/openstack"
     entrypoint: ["${PWD}/scripts/detect-user.sh", "/bin/sh", "-c", "terraform $$@", "--"]
+    command: ["init"]
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - ${PWD}:${PWD}
@@ -18,9 +19,11 @@ services:
       OS_CLOUD:
       OS_CLIENT_CONFIG_FILE:
       OS_DOMAIN_NAME:
+      OS_TOKEN:
       POETRY_CACHE_DIR: "${POETRY_CACHE_DIR:-/tmp}"
       POETRY_VIRTUALENVS_PATH: "${POETRY_VIRTUALENVS_PATH:-/tmp}"
       SSH_AUTH_SOCK:
+      TF_VAR_ssh_key_path:
       TF_VAR_stem:
 
   tests:
@@ -43,3 +46,35 @@ services:
     extends:
       file: docker-compose.yaml
       service: tests
+  terraform_apply:
+    extends:
+      file: docker-compose.yaml
+      service: terraform
+    command: ["apply", "-auto-approve"]
+    depends_on:
+      terraform:
+        condition: service_completed_successfully
+  dev:
+    extends:
+      file: docker-compose.yaml
+      service: tests
+    environment:
+      ANSIBLE_HOST_KEY_CHECKING: false
+    depends_on:
+      terraform_apply:
+        condition: service_completed_successfully
+    entrypoint:
+      - "${PWD}/scripts/detect-user.sh"
+      - "/bin/bash"
+      - "-c"
+      - >
+        poetry install --with ansible &&
+        poetry run ansible-galaxy install -r tests/ansible.requirements.yml &&
+        poetry run ansible-playbook
+        -i tests/terraform/openstack/kubeadm-hosts.cfg
+        tests/playbooks/prepare.yml
+        playbooks/00_apiserver_proxy.yml
+        playbooks/01-site.yml
+        $$@
+      - "--"
+    command: []

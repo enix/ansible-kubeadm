@@ -13,8 +13,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     python3-pip \
     sshpass \
     sudo \
- && rm -rf /var/lib/apt/lists/*
-RUN pip3 install --no-cache poetry==1.3.2
+ && rm -rf /var/lib/apt/lists/* \
+ && ln -s /usr/bin/python3 /usr/local/bin/python
+RUN pip3 install --no-cache poetry==1.6.1
 
 COPY --from=docker /usr/local/bin/docker /usr/local/bin/docker
 # docker-compose and docker-buildx (unused)
