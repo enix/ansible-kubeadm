@@ -1,14 +1,28 @@
 ---
+- name: 'Create directory to store keys'
+  file:
+    dest: /etc/apt/keyrings
+    state: directory
+
 - name: 'Add kubernetes repo signing key'
-  apt_key:
+  ansible.builtin.get_url:
     url: '{{ kubernetes_repository.gpg_url }}'
-    state: present
+    dest: '/etc/apt/keyrings/kubernetes-apt-keyring.asc'
+    force: true
 
 - name: 'Add the kubernetes repository'
   apt_repository:
     repo: '{{ kubernetes_repository.repo_url }}'
     state: present
-  register: kube_repo_just_added
+    update_cache: false
+  register: _kube_repo_just_added
+
+- name: 'Cleanup old kubernetes repository'
+  apt_repository:
+    repo: '{{ kubernetes_old_repository.repo_url }}'
+    state: absent
+    update_cache: false
+  when: kubernetes_repository.repo_url != kubernetes_old_repository.repo_url
 
 - name: 'refresh source list'
   apt:
@@ -21,4 +35,4 @@
   when: >-
     repo_refresh_time|int >= 0 or force_update
   vars:
-    force_update: '{{ force_apt_update|bool or kube_repo_just_added is changed }}'
+    force_update: '{{ force_apt_update|bool or _kube_repo_just_added is changed }}'

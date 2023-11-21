@@ -25,4 +25,11 @@
     name: "{{ kube_package_dict.keys() }}"
     state: "latest"
     allow_change_held_packages: "{{ ansible_check_mode if ansible_version.string is version('2.13', '>=') else omit }}"
-  when: not(kube_repo_just_added is changed and ansible_check_mode)
+  when: not(_kube_repo_just_added is changed and ansible_check_mode)
+  register: _kubelet_installed
+
+- name: 'Restart kubelet'
+  service:
+    name: 'kubelet'
+    state: restarted
+  when: _kubelet_installed is changed and not ansible_check_mode
