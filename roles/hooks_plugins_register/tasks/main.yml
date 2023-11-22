@@ -31,17 +31,21 @@
     sorted_hooks: "{{ sorted_hooks|sort }}"
   vars:
     hooks_file: >-
-      {{ q('community.general.filetree', kubeadm_plugins_dir)
-         |selectattr('state', 'eq', 'file')
-         |selectattr('path', 'match', '[^./][^/]*/[^./][^/]*/[^./][^/]*.ya?ml')
-         |map(attribute='path')|list
-       }}
+      {%- set files = [] -%}
+      {%- for dir in ([kubeadm_plugins_dir] if kubeadm_plugins_dir is string else kubeadm_plugins_dir) -%}
+        {%- set _ = files.extend(q('community.general.filetree', dir)
+           |selectattr('state', 'eq', 'file')
+           |selectattr('path', 'match', '[^./][^/]*/[^./][^/]*/[^./][^/]*.ya?ml')
+           |map(attribute='path')|list
+         ) -%}
+      {%- endfor -%}
+      {{ files }}
     # prepend directory to all relative hook path
     hooks_absolute_path: '{{ [kubeadm_plugins_dir]|product(hooks_file)|map("join", "/")|list }}'
     plugins_name: >-
-      {{ hooks_file|map("regex_replace", "([^/]*)/.*", "\g<1>")|list }}
+      {{ hooks_file|map("regex_replace", ".*/([^/]*)/[^/]*/[^/]*", "\g<1>")|list }}
     hooks_name: >-
-      {{ hooks_file|map("regex_replace", "[^/]*/([^/]*)/.*", "\g<1>")|list }}
+      {{ hooks_file|map("regex_replace", ".*/[^/]*/([^/]*)/[^/]*", "\g<1>")|list }}
     hooks_basename: "{{ hooks_file|map('basename')|list }}"
     sorted_hooks: "{{ hooks_basename|zip(plugins_name, hooks_name, hooks_absolute_path)|list }}"
 
