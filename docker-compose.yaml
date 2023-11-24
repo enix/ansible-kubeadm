@@ -46,10 +46,12 @@ services:
     extends:
       file: docker-compose.yaml
       service: tests
-  terraform_apply:
+  terraform_dev:
     extends:
       file: docker-compose.yaml
       service: terraform
+    environment:
+      TF_VAR_inventory_dir: "${PWD}/tests/dev"
     command: ["apply", "-auto-approve"]
     depends_on:
       terraform:
@@ -61,7 +63,7 @@ services:
     environment:
       ANSIBLE_HOST_KEY_CHECKING: false
     depends_on:
-      terraform_apply:
+      terraform_dev:
         condition: service_completed_successfully
     entrypoint:
       - "${PWD}/scripts/detect-user.sh"
@@ -71,10 +73,11 @@ services:
         poetry install --with ansible &&
         poetry run ansible-galaxy install -r tests/ansible.requirements.yml &&
         poetry run ansible-playbook
-        -i tests/terraform/openstack/kubeadm-hosts.cfg
+        -i tests/dev/kubeadm-hosts.cfg
         tests/playbooks/prepare.yml
         playbooks/00_apiserver_proxy.yml
         playbooks/01-site.yml
+        tests/playbooks/cni.yml
         $$@
       - "--"
     command: []
