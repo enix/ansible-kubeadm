@@ -3,12 +3,14 @@
   file:
     dest: /etc/apt/keyrings
     state: directory
+  register: _apt_keyring_directory
 
 - name: 'Add kubernetes repo signing key'
   ansible.builtin.get_url:
     url: '{{ kubernetes_repository.gpg_url }}'
     dest: '/etc/apt/keyrings/kubernetes-apt-keyring.asc'
     force: true
+  when: not(_apt_keyring_directory is changed and ansible_check_mode)
 
 - name: 'Add the kubernetes repository'
   apt_repository:
