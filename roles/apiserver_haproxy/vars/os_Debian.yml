@@ -1,0 +1,4 @@
+---
+_haproxy_version: '{{ _apiserver_proxy_haproxy_version | regex_replace("^(\d+[.]\d+)[.].+", "\1") }}'
+haproxy_upstream_repo_url: 'deb [signed-by=/etc/apt/keyrings/haproxy.asc] http://haproxy.debian.net {{ ansible_distribution_release }}-backports-{{ _haproxy_version }} main'
+haproxy_upstream_gpg_url: 'https://haproxy.debian.net/bernat.debian.org.gpg'
