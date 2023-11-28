@@ -1,0 +1,7 @@
+action_reasons_review_skip: true
+cluster_config:
+ networking:
+   podSubnet: 10.95.0.0/16
+ controllerManager:
+   extraArgs:
+     "allocate-node-cidrs": "true"
