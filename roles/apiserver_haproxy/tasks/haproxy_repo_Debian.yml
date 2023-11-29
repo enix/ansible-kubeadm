@@ -1,19 +1,51 @@
 ---
+- name: 'Install software-properties-common if installing ppa'
+  apt:
+    name: software-properties-common
+  when: haproxy_repo_url.startswith('ppa:')
+
+- name: 'Create directory to store keys'
+  file:
+    dest: /etc/apt/keyrings
+    state: directory
+  register: _apt_keyring_directory
+  when: haproxy_gpg_url is not none and haproxy_gpg_url|length > 0
+
 - name: 'Add HAProxy repo signing key'
-  apt_key:
-    url: 'https://haproxy.debian.net/bernat.debian.org.gpg'
+  ansible.builtin.get_url:
+    url: '{{ haproxy_gpg_url }}'
+    dest: /etc/apt/keyrings/haproxy.asc
+    force: true
+  when:
+    - haproxy_gpg_url is not none and haproxy_gpg_url|length > 0
+    - not(_apt_keyring_directory is changed and ansible_check_mode)
+
+- name: 'Add the HAProxy repository (in dry-run to check change)'
+  apt_repository:
+    repo: '{{ haproxy_repo_url }}'
+    filename: haproxy
     state: present
+    update_cache: false
+  check_mode: true
+  register: _haproxy_repo_dry_run
+
+- name: 'Remove repository file if modification exists.'
+  file:
+    dest: /etc/apt/sources.list.d/haproxy.list
+    state: absent
+  when: _haproxy_repo_dry_run is changed
 
 - name: 'Add the HAProxy repository'
   apt_repository:
-    repo: 'deb http://haproxy.debian.net bullseye-backports-{{ _apiserver_proxy_haproxy_version | regex_replace("^(\d+[.]\d+)[.].+", "\1") }} main'
+    repo: '{{ haproxy_repo_url }}'
     filename: haproxy
     state: present
-  register: haproxy_repo_just_added
+    update_cache: false
+  register: _haproxy_repo_just_added
 
 - name: 'refresh source list'
   apt:
     update_cache: true
   when: >-
-    haproxy_repo_just_added is changed
+    _haproxy_repo_just_added is changed
     or force_apt_update|bool

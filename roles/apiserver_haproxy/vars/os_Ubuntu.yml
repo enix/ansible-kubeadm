@@ -1,0 +1,3 @@
+---
+haproxy_upstream_repo_url: 'ppa:vbernat/haproxy-{{ _haproxy_version }}'
+haproxy_upstream_gpg_url:

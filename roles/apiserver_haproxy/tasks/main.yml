@@ -2,8 +2,19 @@
 - name: 'Detect if compose-based apiserver proxy exists'
   include_tasks: upgrade_from_docker.yml
 
+- name: 'Include HAproxy OS variables'
+  include_vars: '{{ file_vars }}'
+  loop_control:
+    loop_var: file_vars
+  with_fileglob:
+    - 'vars/os_{{ ansible_os_family }}.yml'
+    - 'vars/os_{{ ansible_distribution }}.yml'
+    - 'vars/os_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
+
 - name: 'Add HAProxy repository'
-  include_tasks: '{{ item }}'
+  include_tasks: '{{ file_tasks }}'
+  loop_control:
+    loop_var: file_tasks
   with_first_found:
     - 'haproxy_repo_{{ ansible_distribution }}_{{ ansible_distribution_release }}.yml'
     - 'haproxy_repo_{{ ansible_distribution }}.yml'
@@ -27,7 +38,7 @@
     mode: 0600
   notify: 'Reload HAProxy'
   when:
-    - not(haproxy_repo_just_added is changed and ansible_check_mode)
+    - not(_haproxy_repo_just_added is changed and ansible_check_mode)
 
 - name: 'export vars'
   set_fact:

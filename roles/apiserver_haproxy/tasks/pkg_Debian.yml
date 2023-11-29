@@ -1,13 +1,13 @@
 ---
-- name: 'Get version of kubelet package'
+- name: 'Get version of haproxy package'
   package_facts:
 
-- name: 'find version of kubeadm to install'
+- name: 'find version of haproxy to install'
   pkg_version_match:
     name: haproxy
     version: '{{ _apiserver_proxy_haproxy_version }}'
   when:
-    - not(haproxy_repo_just_added is changed and ansible_check_mode)
+    - not(_haproxy_repo_just_added is changed and ansible_check_mode)
     - packages.haproxy|default([])|select('match', _apiserver_proxy_haproxy_version)|list|length == 0
   register: haproxy_version
 
@@ -28,4 +28,4 @@
   apt:
     name: 'haproxy'
     state: 'present'
-  when: not(haproxy_repo_just_added is changed and ansible_check_mode)
+  when: not(_haproxy_repo_just_added is changed and ansible_check_mode)
