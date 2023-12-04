@@ -1,6 +1,7 @@
 ---
 _control_plane: false
 
+kubernetes_repository: '{{ kubernetes_upstream_repository }}'
 kubeadm_pkgs: true
 node_pkgs: true
 

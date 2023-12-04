@@ -1,6 +1,6 @@
 ---
 _repo_version: '{{ (_target_kubeadm_version|regex_findall("(?:\d+)"))[0:2]|join(".") }}'
-kubernetes_repository: >-
+kubernetes_upstream_repository: >-
   {%- if _repo_version is version("1.24", ">=") -%}
     {{ kubernetes_new_repository }}
   {%- else -%}
