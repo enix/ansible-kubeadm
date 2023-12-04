@@ -1,6 +1,7 @@
 ---
 - debug:
     var: _failure_reasons
+  changed_when: _failure_reasons|length > 0
 
 - name: 'Fail if failure reasons found'
   fail:
@@ -10,10 +11,12 @@
 - name: 'Display config upgrade reasons'
   debug:
     var: _config_upgrade_reasons
+  changed_when: _config_upgrade_reasons|length > 0
 
 - name: 'Display upgrade reasons'
   debug:
     var: _upgrade_reasons
+  changed_when: _upgrade_reasons|length > 0
 
 - name: 'Pause to review diff and upgrade reasons'
   pause:

@@ -30,12 +30,17 @@
   roles:
     - role: find_ip
     - role: preflight_check_nodes
-    - role: process_reasons
   tasks:
     - include_role:
         name: hooks_call
       vars:
         kubeadm_hook_list: ['post_preflight_nodes']
+
+- hosts: '{{ kube_cp_group|default("kube_control_plane") }}:{{ kube_worker_group|default("kube_workers") }}'
+  any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
+  gather_facts: false
+  roles:
+    - role: process_reasons
 
 - hosts: '{{ kube_cp_group|default("kube_control_plane") }}'
   any_errors_fatal: '{{ any_errors_fatal|default(true) }}'
