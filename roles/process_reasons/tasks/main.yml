@@ -21,7 +21,8 @@
 - name: 'Pause to review diff and upgrade reasons'
   pause:
   when:
-    - _upgrade_reasons|length > 0 or _config_upgrade_reasons|length > 0
+    - ansible_play_hosts_all|map('extract', hostvars, '_upgrade_reasons')|map('default', [])|map('length')|select|list|length > 0
+      or ansible_play_hosts_all|map('extract', hostvars, '_config_upgrade_reasons')|map('default', [])|map('length')|select|list|length > 0
     - groups.cp_running|default([])|length > 0
     - not action_reasons_review_skip|bool
 
