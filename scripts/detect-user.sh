@@ -24,7 +24,11 @@ fi
 if [ "$(id -u)" -ne "${PWD_UID}" ] ; then
   getent passwd ${PWD_UID} || ${USERADD} -u ${PWD_UID} enix
   PWD_UNAME=$(stat . -c "%U")
-  exec su ${PWD_UNAME} "$@"
+  if command -v sudo > /dev/null; then
+    sudo -HEu ${PWD_UNAME} "$@"
+  else
+    exec su ${PWD_UNAME} "$@"
+  fi;
 else
-  $@
+  "$@"
 fi
