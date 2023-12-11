@@ -1,5 +1,6 @@
 import itertools
 import os
+import re
 
 import ansible_runner
 
@@ -56,5 +57,6 @@ def run_ansible_playbook(
 
 def assert_ansible_error(run):
     assert run.status == "successful"
+    assert len(re.findall(r".*fatal: .*", run.stdout.read())) == 0
     for host_failed, number_failed in run.stats.get("failures", {}).items():
         assert number_failed == 0

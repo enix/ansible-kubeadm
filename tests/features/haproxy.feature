@@ -35,6 +35,7 @@ Feature: Haproxy
         When With those group_vars on group all:
             apiserver_proxy_use_docker: false
         When I reset tasks counters
+        When I dry-run the playbooks 00_apiserver_proxy.yml
         When I run the playbooks 00_apiserver_proxy.yml
                                  01_site.yml
         Then I should have a working cluster
