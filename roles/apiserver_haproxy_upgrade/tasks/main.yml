@@ -18,6 +18,7 @@
     service:
       name: haproxy
       state: reloaded
+    when: not(_haproxy_repo_just_added is changed and ansible_check_mode)
 
   rescue:
   - name: "Restart compose stack if error occured"
