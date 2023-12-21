@@ -1,9 +1,9 @@
 ---
 services:
   terraform:
-    environment:
-      SSH_KEY: ${HOME}/.ssh
-      # SSH_AUTH_SOCK: /run/host-services/ssh-auth.sock  # For MacOS
+    volumes:
+      - ${OS_CLIENT_CONFIG_FILE}:${OS_CLIENT_CONFIG_FILE}
+
+  tests:
     volumes:
       - ${HOME}/.cache:${HOME}/.cache
-      - ${OS_CLIENT_CONFIG_FILE}:${OS_CLIENT_CONFIG_FILE}

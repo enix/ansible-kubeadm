@@ -27,3 +27,5 @@ To tear down manually when you finished
 export OS_CLOUD=openstack
 docker compose run terraform destroy
 ```
+
+**NOTE**: for mac os users, please add `_SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock` in a `.env` file at the top level directory of the repository
