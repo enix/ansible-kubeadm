@@ -15,6 +15,9 @@
   ansible.builtin.get_url:
     url: '{{ haproxy_gpg_url }}'
     dest: /etc/apt/keyrings/haproxy.asc
+    owner: root
+    group: root
+    mode: 0644
     force: true
   when:
     - haproxy_gpg_url is not none and haproxy_gpg_url|length > 0

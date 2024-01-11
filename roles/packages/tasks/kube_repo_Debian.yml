@@ -9,6 +9,9 @@
   ansible.builtin.get_url:
     url: '{{ kubernetes_repository.gpg_url }}'
     dest: '/etc/apt/keyrings/kubernetes-apt-keyring.asc'
+    owner: root
+    group: root
+    mode: 0644
     force: true
   when: not(_apt_keyring_directory is changed and ansible_check_mode)
 
