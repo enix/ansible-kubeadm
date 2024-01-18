@@ -18,6 +18,12 @@
   when: drain_node|bool
   notify:
   - Pause after upgrade
+  - Restart kubelet
   - Reboot node
   - Wait for node
   - Uncordon node
+
+- include_role:
+    name: hooks_call
+  vars:
+    kubeadm_hook_list: ['pre_nodes_upgrade']

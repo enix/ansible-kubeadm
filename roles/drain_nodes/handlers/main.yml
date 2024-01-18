@@ -3,6 +3,12 @@
   pause:
   when: pause_after_drain_and_node_upgrade|bool
 
+- name: 'Restart kubelet'
+  service:
+    name: kubelet
+    state: restarted
+  when: not reboot_node|bool
+
 - name: 'Reboot node'
   reboot:
   when: reboot_node|bool
