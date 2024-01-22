@@ -17,6 +17,8 @@
       {%- endif %}
     {%- endif -%}
   register: upgrade_node
+  notify:
+    - Restart kubelet
 
 - name: 'Display result of "kubeadm upgrade node"'
   debug:

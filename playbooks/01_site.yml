@@ -126,7 +126,7 @@
     - include_role:
         name: hooks_call
       vars:
-        kubeadm_hook_list: ['pre_cp_upgrade', 'pre_nodes_upgrade']
+        kubeadm_hook_list: ['early_cp_upgrade', 'early_nodes_upgrade']
   roles:
     - role: packages
       vars:
@@ -153,7 +153,7 @@
     - include_role:
         name: hooks_call
       vars:
-        kubeadm_hook_list: ['pre_workers_upgrade', 'pre_nodes_upgrade']
+        kubeadm_hook_list: ['early_workers_upgrade', 'early_nodes_upgrade']
   roles:
     - role: packages
       vars:
