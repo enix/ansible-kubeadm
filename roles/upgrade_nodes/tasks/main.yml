@@ -16,6 +16,9 @@
         {{ kubeadm_patch_dir }}
       {%- endif %}
     {%- endif -%}
+    {% for error in kubeadm_ignore_preflight_errors %}
+    --ignore-preflight-errors={{ error }}
+    {% endfor %}
   register: upgrade_node
 
 - name: 'Display result of "kubeadm upgrade node"'

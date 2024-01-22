@@ -1,5 +1,6 @@
 ---
 enable_kubeadm_patches: true
+kubeadm_ignore_preflight_errors: []
 kubeadm_patch_dir: /etc/kubernetes/patches
 kube_cp_group: kube_control_plane
 kube_worker_group: kube_workers
