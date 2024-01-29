@@ -1,6 +1,10 @@
 ---
 - name: 'Plan upgrade'
-  command: kubeadm upgrade plan {{ kubeadm_version.version.split( '-' )|first }}
+  command: >-
+    kubeadm upgrade plan {{ kubeadm_version.version.split( '-' )|first }}
+    {% for error in kubeadm_ignore_preflight_errors %}
+    --ignore-preflight-errors={{ error }}
+    {% endfor %}
   environment:
     KUBECONFIG: '/etc/kubernetes/admin.conf'
   register: plan_upgrade
@@ -12,7 +16,11 @@
               stdout=plan_upgrade.stdout_lines) }}
 
 - name: 'Apply upgrade'
-  command: kubeadm upgrade apply {{ kubeadm_version.version.split( '-' )|first }} -y
+  command: >-
+    kubeadm upgrade apply {{ kubeadm_version.version.split( '-' )|first }} -y
+    {% for error in kubeadm_ignore_preflight_errors %}
+    --ignore-preflight-errors={{ error }}
+    {% endfor %}
   register: apply_upgrade
 
 - name: 'Display result of "kubectl upgrade apply"'
