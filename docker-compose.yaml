@@ -10,21 +10,42 @@ services:
     - ${PWD}:${PWD}
     - /tmp:/tmp
     - ./.test-ansible:${HOME}/.ansible
-    - ${SSH_AUTH_SOCK:-/run}:${SSH_AUTH_SOCK:-/run}
+    - ${_SSH_AUTH_SOCK:-${SSH_AUTH_SOCK:-/run}}:${_SSH_AUTH_SOCK:-${SSH_AUTH_SOCK:-/run}}
     - ${SSH_KEY:-${HOME}}:${SSH_KEY_MOUNT:-${SSH_KEY:-${HOME}}}
     environment:
       KEEP_SERVERS:
       KEEP_SERVERS_AFTER_FAIL:
       HOME:
+      OS_AUTH_URL:
       OS_CLOUD:
       OS_CLIENT_CONFIG_FILE:
       OS_DOMAIN_NAME:
+      OS_IDENTITY_API_VERSION:
+      OS_INTERFACE:
+      OS_PASSWORD:
+      OS_PROJECT_DOMAIN_ID:
+      OS_PROJECT_DOMAIN_NAME:
+      OS_PROJECT_ID:
+      OS_PROJECT_NAME:
+      OS_TENANT_ID:
+      OS_TENANT_NAME:
       OS_TOKEN:
+      OS_REGION_NAME:
+      OS_USER_DOMAIN_NAME:
+      OS_USERNAME:
       POETRY_CACHE_DIR: "${POETRY_CACHE_DIR:-/tmp}"
       POETRY_VIRTUALENVS_PATH: "${POETRY_VIRTUALENVS_PATH:-/tmp}"
-      SSH_AUTH_SOCK:
+      SSH_AUTH_SOCK: "${_SSH_AUTH_SOCK:-${SSH_AUTH_SOCK:-/run}}"
+      TF_VAR_allocate_private_net:
+      TF_VAR_control_plane_count:
+      TF_VAR_floating_pool:
+      TF_VAR_image_name:
+      TF_VAR_network_name:
+      TF_VAR_inventory_dir:
       TF_VAR_ssh_key_path:
       TF_VAR_stem:
+      TF_VAR_worker_count:
+
 
   tests:
     build: .
@@ -37,18 +58,15 @@ services:
     ]
     command: ["-x"]
     extends:
-      file: docker-compose.yaml
       service: terraform
 
   shell:
     entrypoint: ["${PWD}/scripts/detect-user.sh"]
-    command: ["-c", "/bin/bash"]
+    command: ["/bin/bash"]
     extends:
-      file: docker-compose.yaml
       service: tests
   terraform_dev:
     extends:
-      file: docker-compose.yaml
       service: terraform
     environment:
       TF_VAR_inventory_dir: "${PWD}/tests/dev"
@@ -58,7 +76,6 @@ services:
         condition: service_completed_successfully
   dev:
     extends:
-      file: docker-compose.yaml
       service: tests
     environment:
       ANSIBLE_HOST_KEY_CHECKING: false
