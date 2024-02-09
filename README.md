@@ -17,9 +17,11 @@ What ansible-kubeadm expect to be done and will not do:
   - remove unattented-upgrade
   - configure CNI
 
+
 ## Quickstart
 
 see [Quickstart](docs/quickstart.md)
+
 
 ## Configuration
 
@@ -27,9 +29,18 @@ If you want a customized (ansible-)kubeadm experience there is a number of varia
 
 [Variables reference](docs/variables.md)
 
+
+## Guides
+
+Some operation has their own guided page:
+
+- [join nodes](docs/guides/join_nodes.md)
+
+
 ## Flow
 
 If you're looking for what ansible-kubeadm is doing step-by-step, [hooks && plugins](docs/hooks_and_plugins.md) is a good way to start.
+
 
 ## Migration planning
 

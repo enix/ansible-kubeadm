@@ -1,0 +1,40 @@
+---
+- name: 'Fetch bootstrap token'
+  run_once: true
+  delegate_to: '{{ cp_node }}'
+  block:
+    - name: 'Get list of bootstrap token'
+      kubectl:
+        state: get
+        resource_type: secret
+        namespace: kube-system
+        extra_args: '--field-selector=type=bootstrap.kubernetes.io/token'
+        kubeconfig: /etc/kubernetes/admin.conf
+      register: _bootstrap_tokens
+      when:
+        - not(groups.cp_running|default([])|length == 0 and ansible_check_mode)
+
+    - name: 'Display all bootstrap tokens'
+      debug:
+        var: _bootstrap_tokens
+        verbosity: 1
+
+    - name: 'Filter expire token'
+      set_fact:
+        _valid_bootstrap_tokens: >-
+          {%- if ansible_collection_name is defined and ansible_collection_name is not none -%}
+            {%- set filter_name = "enix.kubeadm.bootstrap_token_valid" -%}
+          {%- else -%}
+            {%- set filter_name = "bootstrap_token_valid" -%}
+          {%- endif -%}
+          {{ [bootstrap_tokens_dry_run["items"]
+             |selectattr('data.usage-bootstrap-authentication', 'defined')|list]
+             |map(filter_name)|first }}
+      vars:
+        # "items" cannot be defaulted easily as jinja fallback on using method instead
+        bootstrap_tokens_dry_run: "{{ {'items': []}|combine(_bootstrap_tokens) }}"
+
+    - name: 'Display valid bootstrap tokens'
+      debug:
+        var: _valid_bootstrap_tokens
+        verbosity: 1

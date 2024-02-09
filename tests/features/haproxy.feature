@@ -18,8 +18,8 @@ Feature: Haproxy
             apiserver_proxy_use_docker: true
             kube_version: 1.23
         When I run the playbook tests/playbooks/prepare.yml
-        When I run the playbooks 00_apiserver_proxy.yml
-                                 01_site.yml
+        When I run the playbooks playbooks/00_apiserver_proxy.yml
+                                 playbooks/01_site.yml
         When I run the playbook tests/playbooks/cni.yml
         Then I should have a working cluster
 
@@ -27,15 +27,15 @@ Feature: Haproxy
         When With those group_vars on group all:
             apiserver_proxy_use_docker:
         When I reset tasks counters
-        When I run the playbooks 00_apiserver_proxy.yml
-                                 01_site.yml
+        When I run the playbooks playbooks/00_apiserver_proxy.yml
+                                 playbooks/01_site.yml
              with error:
                As docker has been deprecated
 
         When With those group_vars on group all:
             apiserver_proxy_use_docker: false
         When I reset tasks counters
-        When I dry-run the playbooks 00_apiserver_proxy.yml
-        When I run the playbooks 00_apiserver_proxy.yml
-                                 01_site.yml
+        When I dry-run the playbooks playbooks/00_apiserver_proxy.yml
+        When I run the playbooks playbooks/00_apiserver_proxy.yml
+                                 playbooks/01_site.yml
         Then I should have a working cluster

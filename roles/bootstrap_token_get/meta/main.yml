@@ -1,4 +1,3 @@
 ---
 dependencies:
-  - role: packages_common
   - role: common_vars

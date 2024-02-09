@@ -1,0 +1,21 @@
+---
+- name: 'Find nodes to join'
+  set_fact:
+    _cp_to_join: >-
+      {{ q('inventory_hostnames', kube_cp_group)
+         |map('extract', hostvars)
+         |rejectattr('_kubelet_config_stat.stat.exists')
+         |map(attribute='inventory_hostname')|list }}
+    cert_encryption_key: >-
+      {{ lookup('password', '/dev/null  length=64 chars=hexdigits') }}
+  run_once: true
+
+- name: 'Upload certificates if control-plane node need to be joined'
+  command: >-
+    kubeadm init phase upload-certs
+    --upload-certs
+    --certificate-key {{ cert_encryption_key }}
+  no_log: '{{ not sensitive_debug|bool }}'
+  run_once: true
+  delegate_to: '{{ cp_node }}'
+  when: _cp_to_join|length > 0
