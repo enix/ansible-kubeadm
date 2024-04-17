@@ -8,7 +8,7 @@
     version: '{{ _apiserver_proxy_haproxy_version }}'
   when:
     - not(_haproxy_repo_just_added is changed and ansible_check_mode)
-    - packages.haproxy|default([])|select('match', _apiserver_proxy_haproxy_version)|list|length == 0
+    - packages.haproxy|default([])|selectattr('version', 'match', _apiserver_proxy_haproxy_version)|list|length == 0
   register: haproxy_version
 
 - name: "Create pinning files"
