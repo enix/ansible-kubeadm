@@ -13,13 +13,13 @@
     dest: /etc/apt/preferences.d/{{ item.pkg }}
     state: absent
   loop: "{{ kube_package_dict|dict2items('pkg', 'version')|rejectattr('version') }}"
-  ignore_errors: "{{ _kube_repo_just_added is changed or ansible_check_mode }}"
 
 - name: 'Unhold package before upgrade'
   dpkg_selections:
     selection: 'install'
     name: '{{ item }}'
   loop: "{{ kube_package_dict.keys() }}"
+  ignore_errors: "{{ _kube_repo_just_added is changed or ansible_check_mode }}"
 
 - name: 'Install kubernetes packages'
   apt:
