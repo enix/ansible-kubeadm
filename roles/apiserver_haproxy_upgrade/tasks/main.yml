@@ -2,7 +2,7 @@
 - name: "Upgrade to haproxy"
   block:
   - name: "Stop compose stack"
-    docker_compose:
+    community.docker.docker_compose_v2:
       project_src: '{{ apiserver_proxy_stack_dir }}'
       state: absent
     vars:
