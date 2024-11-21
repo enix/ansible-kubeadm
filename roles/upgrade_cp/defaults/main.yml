@@ -1,2 +1,3 @@
 ---
 drain: true
+kubeadm_upgrade_apply_force: false

@@ -21,6 +21,9 @@
     {% for error in kubeadm_ignore_preflight_errors %}
     --ignore-preflight-errors={{ error }}
     {% endfor %}
+    {% if kubeadm_upgrade_apply_force|bool %}
+    --force
+    {% endif %}
   register: apply_upgrade
 
 - name: 'Display result of "kubectl upgrade apply"'
