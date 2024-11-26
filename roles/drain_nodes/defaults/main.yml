@@ -1,6 +1,7 @@
 ---
 drain_node: true
 reboot_node: false
+delete_emptydir_data: false
 delete_local_data: false
 pause_before_drain: false
 pause_after_drain_and_node_upgrade: false
