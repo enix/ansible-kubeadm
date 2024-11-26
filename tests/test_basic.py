@@ -17,3 +17,8 @@ def test_upgrade(operating_system):
 @scenario("features/haproxy.feature", "Test upgrade to haproxy pkg")
 def test_haproxy(operating_system):
     pass
+
+
+@scenario("features/join_nodes.feature", "Join nodes via ansible-kubeadm")
+def test_join_nodes(operating_system):
+    pass

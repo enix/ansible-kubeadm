@@ -1,8 +1,10 @@
-Feature: Upgrade
-    A test to upgrade a kubeadm cluster
+Feature: Join Nodes
+    A test to join nodes to a kubeadm cluster
 
-    Scenario Outline: Upgrade via ansible-kubeadm
+    Scenario: Join nodes via ansible-kubeadm
         Given I want ansible 3
+        Given The cluster control_plane_count = 1
+        Given The cluster worker_count = 0
         Given Some running VMs
 
         When With those group_vars on group all:
@@ -14,21 +16,21 @@ Feature: Upgrade
                   "allocate-node-cidrs": "true"
             kubelet_config:
               cgroupDriver: "systemd"
-            apiserver_proxy_use_docker: false
-            kube_version: <from_version>
-            action_reasons_review_skip: true
+            kube_version: 1.23
         When I run the playbook tests/playbooks/prepare.yml
         When I run the playbooks playbooks/00_apiserver_proxy.yml
                                  playbooks/01_site.yml
         When I run the playbook tests/playbooks/cni.yml
+        Then I should have a working cluster
 
-        When With those group_vars on group all: kube_version: <to_version>
+        Then Set cluster worker_count = 1
+        When I run the playbook tests/playbooks/prepare.yml
+        When I run the playbooks playbooks/01_site.yml -e "limit=*-node-1"
+        Then I should have a working cluster
+
+        Then Set cluster control_plane_count = 2
+        When I run the playbook tests/playbooks/prepare.yml
         When I run the playbooks playbooks/00_apiserver_proxy.yml
                                  playbooks/01_site.yml
 
         Then I should have a working cluster
-
-        Examples:
-        | from_version | to_version |
-        | 1.21         | 1.22       |
-        | 1.23         | 1.24       |

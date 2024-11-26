@@ -1,8 +1,8 @@
-{%- if valid_bootstrap_tokens|length == 0 -%}
+{%- if _valid_bootstrap_tokens|length == 0 -%}
 {#- Use a dummy token for dry-run if it didn't exist -#}
 {%- set token_data = {"token-id": "ZHJ5LXJ1biB0b2tlbi1pZAo=", "token-secret": "ZHJ5LXJ1biB0b2tlbi1zZWNyZXQK"} -%}
 {%- else -%}
-{%- set token_data = (valid_bootstrap_tokens|first).data -%}
+{%- set token_data = (_valid_bootstrap_tokens|first).data -%}
 {%- endif -%}
 ---
 {% if _target_kube_version is version("1.22", ">=") -%}
@@ -15,7 +15,7 @@ discovery:
   bootstrapToken:
     token: "{{ token_data['token-id']|b64decode }}.{{ token_data['token-secret']|b64decode }}"
     caCertHashes:
-    - "sha256:{{ (ca_info.public_key_fingerprints.sha256|default('dry-run-sha256')).replace(':', '') }}"
+    - "sha256:{{ (ca_cert_hash|default('dry-run-sha256')) }}"
 {% if control_plane_endpoint %}
     apiServerEndpoint: "{{ control_plane_endpoint }}"
 {% else %}
