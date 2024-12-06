@@ -40,6 +40,7 @@
     path: '{{ item }}'
     state: 'absent'
   register: kubeadm_removed_patches
+  when: not ansible_check_mode
   with_items: >-
     {{ kubeadm_current_patches.files|map(attribute="path")|list
         |difference(kubeadm_deployed_patches.results|map(attribute="dest")|list) }}
