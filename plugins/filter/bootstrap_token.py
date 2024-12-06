@@ -31,11 +31,14 @@ class FilterModule(object):
         else:
             threshold = arrow.utcnow()
         for token in token_list:
-            if (
-                arrow.get(base64.b64decode(token["data"]["expiration"]).decode("utf-8"))
-                >= threshold
-            ):
-                yield token
+            try:
+                if (
+                    arrow.get(base64.b64decode(token["data"]["expiration"]).decode("utf-8"))
+                    >= threshold
+                ):
+                    yield token
+            except KeyError:
+                continue
 
 
 if __name__ == "__main__":
