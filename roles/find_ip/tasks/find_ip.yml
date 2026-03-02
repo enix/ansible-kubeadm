@@ -16,7 +16,7 @@
     matched_iface: >-
       [ {%- for iface_name in ansible_interfaces -%}
           {%- set iface = hostvars[inventory_hostname]["ansible_" ~ iface_name] -%}
-          {%- if iface.ipv4 is defined and network_cidr|ansible.netcommon.network_in_network(iface.ipv4.address) -%}
+          {%- if iface.ipv4 is defined and network_cidr|ansible.utils.network_in_network(iface.ipv4.address) -%}
              {{ iface }},
         {%- endif -%}
       {%- endfor -%} ]
