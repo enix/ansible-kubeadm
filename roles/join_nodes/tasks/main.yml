@@ -1,8 +1,6 @@
 ---
 - name: 'Retrieve variable from control-plane'
   set_fact:
-    ca_info: '{{ hostvars[cp_node].ca_info }}'
-    valid_bootstrap_tokens: '{{ hostvars[cp_node].valid_bootstrap_tokens }}'
     control_plane_endpoint: '{{ hostvars[cp_node].control_plane_endpoint }}'
     _control_plane: '{{ _control_plane }}'
 
@@ -10,21 +8,9 @@
   include_role:
     name: find_ip
 
-- name: 'List all node'
-  kubectl:
-    state: get
-    resource_type: nodes
-    kubeconfig: /etc/kubernetes/admin.conf
-  run_once: true
-  delegate_to: '{{ cp_node }}'
-  register: current_nodes
-  when:
-  - not(hostvars[cp_node].found_kubectl.rc == 1 and ansible_check_mode)
-
-- name: 'Display current node'
-  debug:
-    var: current_nodes
-    verbosity: 1
+- name: "Get CA fingerprint "
+  import_tasks: ca_info.yml
+  when: not(groups.cp_running|default([])|length == 0 and ansible_check_mode)
 
 - name: 'Display JoinConfig'
   debug:
@@ -42,11 +28,8 @@
     {%- endif -%}
   args:
     stdin: '{{ lookup("template", role_path ~ "/templates/join_config.j2") }}'
+    creates: '{{ _kubelet_config_path }}'
   register: kubeadm_node_join
-  when: ansible_nodename not in nodes_list
-  vars:
-    # "items" cannot be defaulted easily as jinja fallback on using method instead
-    nodes_list: "{{ ({'items': []}|combine(current_nodes))['items']|map(attribute='metadata.name')|list }}"
 
 - name: 'Display output of "kubeadm join"'
   debug:

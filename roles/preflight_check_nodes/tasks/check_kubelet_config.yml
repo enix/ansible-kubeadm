@@ -1,12 +1,12 @@
 ---
 - name: 'Test if local kubelet config exists'
   stat:
-    path: '{{ kubelet_config_path }}'
+    path: '{{ _kubelet_config_path }}'
   register: _kubelet_config_stat
 
 - name: 'Fetch local kubelet config if exist'
   slurp:
-    path: '{{ kubelet_config_path }}'
+    path: '{{ _kubelet_config_path }}'
   register: _kubelet_config_fetch
   when: _kubelet_config_stat.stat.exists
 

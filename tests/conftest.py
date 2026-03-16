@@ -95,8 +95,8 @@ def vagrant(tmpdir):
     return LocalVagrant(inventory_dir_copy=tmpdir)
 
 
-@then("Set cluster {variable}={value}")
-@given("The cluster {variable)={value}")
+@then(parsers.parse("Set cluster {variable} = {value}"))
+@given(parsers.parse("The cluster {variable} = {value}"))
 def cluster_set_param(provider, variable, value):
     provider.vars[variable] = value
     # Refresh infrastructure
@@ -160,7 +160,7 @@ def ansible_extra_args(request):
 
 @when(
     parsers.re(
-        r"I (?P<dry_run>dry-)?run the playbooks?:?\s+(?P<playbooks>.+?)(?P<with_err>\s+with error:?\s+)?(?(with_err)(?P<error>.+)|\Z)",
+        r"I (?P<dry_run>dry-)?run the playbooks?:?\s+(?P<arguments>.+?)(?P<with_err>\s+with error:?\s+)?(?(with_err)(?P<error>.+)|\Z)",
         re.DOTALL,
     )
 )
@@ -171,7 +171,7 @@ def ansible_playbook(
     galaxy_deps,
     ansible_extra_args,
     results,
-    playbooks,
+    arguments,
     dry_run,
     error,
 ):
@@ -179,18 +179,12 @@ def ansible_playbook(
         dry_run = True
     else:
         dry_run = False
-    playbook_list = re.findall(r"[\w./]+", playbooks)
-    if not all(os.path.exists(p) for p in playbook_list):
-        playbook_list_subdir = [os.path.join("playbooks", p) for p in playbook_list]
-        if all(os.path.exists(p) for p in playbook_list_subdir):
-            playbook_list = playbook_list_subdir
-        else:
-            raise ValueError("All playbooks could not be found")
+    argument_list = re.findall(r"[^\s]+", arguments)
     result = run_ansible_playbook(
         virtualenv,
-        playbook_list,
-        ansible_extra_args=ansible_extra_args,
         inventory=inventory,
+        arguments=argument_list,
+        ansible_extra_args=ansible_extra_args,
         dry_run=dry_run,
     )
     if error:
@@ -206,9 +200,9 @@ def ansible_playbook(
 def ansible_kubeadm(inventory, virtualenv, galaxy_deps, ansible_extra_args, results):
     result = run_ansible_playbook(
         virtualenv,
+        inventory,
         ["tests/playbooks/verify.yml"],
         ansible_extra_args=ansible_extra_args,
-        inventory=inventory,
     )
     assert_ansible_error(result)
 

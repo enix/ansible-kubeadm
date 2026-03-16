@@ -2,6 +2,9 @@
 dependencies:
   - role: kubectl_module
   - role: common_vars
+  - role: bootstrap_token_get
+    delegate_to: '{{ cp_node }}'
+    run_once: true
 galaxy_info:
   author: Julien Girardin
   description: Join node to a kubernetes cluster

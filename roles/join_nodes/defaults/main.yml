@@ -1,2 +1,3 @@
 ---
 _control_plane: false
+_kubernetes_ca_cert: /etc/kubernetes/pki/ca.crt

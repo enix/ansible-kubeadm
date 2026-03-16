@@ -17,16 +17,16 @@ Feature: Install
               cgroupDriver: "systemd"
             kube_version: <version>
         When I run the playbook tests/playbooks/prepare.yml
-        When I dry-run the playbooks 00_apiserver_proxy.yml
-                                     01_site.yml
-        When I run the playbooks 00_apiserver_proxy.yml
-                                 01_site.yml
+        When I dry-run the playbooks playbooks/00_apiserver_proxy.yml
+                                     playbooks/01_site.yml
+        When I run the playbooks playbooks/00_apiserver_proxy.yml
+                                 playbooks/01_site.yml
         When I run the playbook tests/playbooks/cni.yml
         Then I should have a working cluster
 
         When I reset tasks counters
-        And  I run the playbooks 00_apiserver_proxy.yml
-                                 01_site.yml
+        And  I run the playbooks playbooks/00_apiserver_proxy.yml
+                                 playbooks/01_site.yml
         Then I should see no orange/yellow changed tasks
 
         Examples:

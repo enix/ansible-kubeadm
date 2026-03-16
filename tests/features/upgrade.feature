@@ -18,13 +18,13 @@ Feature: Upgrade
             kube_version: <from_version>
             action_reasons_review_skip: true
         When I run the playbook tests/playbooks/prepare.yml
-        When I run the playbooks 00_apiserver_proxy.yml
-                                 01_site.yml
+        When I run the playbooks playbooks/00_apiserver_proxy.yml
+                                 playbooks/01_site.yml
         When I run the playbook tests/playbooks/cni.yml
 
         When With those group_vars on group all: kube_version: <to_version>
-        When I run the playbooks 00_apiserver_proxy.yml
-                                 01_site.yml
+        When I run the playbooks playbooks/00_apiserver_proxy.yml
+                                 playbooks/01_site.yml
 
         Then I should have a working cluster
 
