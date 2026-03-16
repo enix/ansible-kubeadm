@@ -18,7 +18,7 @@ from tests.helpers.terraform import TerraformCompose
 from tests.helpers.vagrant import LocalVagrant
 
 DEFAULT_OS = ["Ubuntu22.04"]
-ALL_OS = ["Ubuntu20.04", "Ubuntu22.04", "Debian11"]
+ALL_OS = ["Ubuntu20.04", "Ubuntu22.04", "Debian11", "Debian12"]
 
 
 pytest_plugins = ["tests.helpers.provider"]
