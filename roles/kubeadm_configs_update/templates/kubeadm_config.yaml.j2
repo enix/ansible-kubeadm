@@ -5,7 +5,8 @@
 ---
 {{ _kubelet_config_final|to_nice_yaml(indent=2) }}
 {% endif %}
-{% if _kubeproxy_config_diff.diff_lines|length > 0
+{% if not _kubeproxy_config_diff is skipped
+  and _kubeproxy_config_diff.diff_lines|length > 0
   or groups.cp_running|default([])|length == 0 %}
 ---
 {{ _kubeproxy_config_final|to_nice_yaml(indent=2) }}

@@ -18,7 +18,7 @@
       when: >-
         _cluster_config_diff.diff_lines|length > 0
         or _kubelet_config_diff.diff_lines|length > 0
-        or _kubeproxy_config_diff.diff_lines|length > 0
+        or (not _kubeproxy_config_diff is skipped and _kubeproxy_config_diff.diff_lines|length > 0)
         or groups.cp_running|default([])|length == 0
 
     - name: 'reupload KUBEADM/KUBELET config if cluster running'
@@ -36,6 +36,7 @@
       environment:
         KUBECONFIG: '/etc/kubernetes/admin.conf'
       when:
+        - kubeproxy_enabled|bool
         - _kubeadm_configs_write is changed
-        - _kubeproxy_config_diff.diff_lines|length > 0
+        - not _kubeproxy_config_diff is skipped and _kubeproxy_config_diff.diff_lines|length > 0
         - groups.cp_running|default([])|length > 0

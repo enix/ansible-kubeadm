@@ -1,7 +1,9 @@
 ---
 default_kubeadm_config:
   apiVersion: >-
-    {%- if _target_kube_version is version("1.22", ">=") -%}
+    {% if _target_kube_version is version("1.31", ">=") -%}
+      kubeadm.k8s.io/v1beta4
+    {% elif _target_kube_version is version("1.22", ">=") -%}
       kubeadm.k8s.io/v1beta3
     {%- else -%}
       kubeadm.k8s.io/v1beta2

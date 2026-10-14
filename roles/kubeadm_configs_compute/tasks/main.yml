@@ -83,6 +83,7 @@
       check_mode: false
       register: _in_cluster_kubeproxy_config
       when:
+        - kubeproxy_enabled|bool
         - groups.cp_running|default([])|length > 0
       environment:
         KUBECONFIG: '{{ kubeconfig_admin }}'
@@ -170,6 +171,8 @@
         before: '{{ _kubeproxy_config_orig }}'
         after: '{{ _kubeproxy_config_final }}'
       register: _kubeproxy_config_diff
+      when:
+        - kubeproxy_enabled|bool
 
     - name: "Register diffs as upgrade reasons"
       set_fact:
@@ -182,8 +185,10 @@
             {%- set _config_upgrade_reasons = _config_upgrade_reasons|combine(
                 dict(kubelet_config_diff=_kubelet_config_diff.diff_lines)) -%}
           {%- endif -%}
-          {%- if _kubeproxy_config_diff.diff_lines|length > 0 -%}
-            {%- set _config_upgrade_reasons = _config_upgrade_reasons|combine(
-                dict(kubeproxy_config_diff=_kubeproxy_config_diff.diff_lines)) -%}
+          {%- if not _kubeproxy_config_diff is skipped -%}
+            {%- if _kubeproxy_config_diff.diff_lines|length > 0 -%}
+              {%- set _config_upgrade_reasons = _config_upgrade_reasons|combine(
+                  dict(kubeproxy_config_diff=_kubeproxy_config_diff.diff_lines)) -%}
+            {%- endif -%}
           {%- endif -%}
           {{ _config_upgrade_reasons }}

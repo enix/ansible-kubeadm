@@ -19,6 +19,9 @@
     {% for error in kubeadm_ignore_preflight_errors %}
     --ignore-preflight-errors={{ error }}
     {% endfor %}
+    {% if not kubeproxy_enabled|bool -%}
+    --skip-phases=addon/kube-proxy
+    {%- endif -%}
   register: upgrade_node
   notify:
     - Restart kubelet

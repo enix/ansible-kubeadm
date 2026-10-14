@@ -8,7 +8,7 @@
     kubectl drain
     --ignore-daemonsets
     {% if delete_local_data|bool %}
-    --delete-local-data
+    --delete-emptydir-data
     {% endif %}
     {% if drain_force|bool %}
     --force
