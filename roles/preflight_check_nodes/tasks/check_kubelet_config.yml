@@ -12,9 +12,15 @@
 
 - name: 'Display kubelet config diff'
   ansible.utils.fact_diff:
-    # "e30K" means "{}" in base64
-    before: '{{ (_kubelet_config_fetch.content|default("e30K")|b64decode)|from_yaml }}'
-    after: '{{ _kubelet_config_final }}'
+    before: >-
+      {{ ((_kubelet_config_fetch.content|default("e30K")|b64decode)|from_yaml)
+          | combine({'containerRuntimeEndpoint':
+        (((_kubelet_config_fetch.content|default("e30K")|b64decode)|from_yaml).containerRuntimeEndpoint | default('') | replace('/var/run/',
+        '/run/'))} if (((_kubelet_config_fetch.content|default("e30K")|b64decode)|from_yaml).containerRuntimeEndpoint is defined) else {}) }}
+    after: >-
+      {{ _kubelet_config_final
+          | combine({'containerRuntimeEndpoint': (_kubelet_config_final.containerRuntimeEndpoint | default('') | replace('/var/run/',
+        '/run/'))} if (_kubelet_config_final.containerRuntimeEndpoint is defined) else {}) }}
   register: _kubelet_configfile_diff
   when: _kubelet_config_fetch.content is defined
 
