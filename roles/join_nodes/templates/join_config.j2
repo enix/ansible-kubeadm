@@ -23,10 +23,15 @@ discovery:
 {% else %}
     apiServerEndpoint: "{{ hostvars[cp_node].ansible_default_ipv4.address }}:6443"
 {% endif %}
-{% if _kubelet_node_ip is defined %}
+{% if _kubelet_node_ip is defined or kubelet_config.containerRuntimeEndpoint is defined %}
 nodeRegistration:
+{% if _kubelet_node_ip is defined %}
   kubeletExtraArgs:
     node-ip: "{{ _kubelet_node_ip.ipv4.address }}"
+{% endif %}
+{% if kubelet_config.containerRuntimeEndpoint is defined %}
+  criSocket: "{{ kubelet_config.containerRuntimeEndpoint }}"
+{% endif %}
 {% endif %}
 {% if _control_plane %}
 controlPlane:

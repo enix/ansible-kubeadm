@@ -11,10 +11,15 @@ kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: "{{ _kube_apiserver_advertise_address.ipv4.address }}"
 {% endif %}
-{% if _kubelet_node_ip is defined %}
+{% if _kubelet_node_ip is defined or kubelet_config.containerRuntimeEndpoint is defined %}
 nodeRegistration:
+{% if _kubelet_node_ip is defined %}
   kubeletExtraArgs:
     node-ip: {{ _kubelet_node_ip.ipv4.address }}
+{% endif %}
+{% if kubelet_config.containerRuntimeEndpoint is defined %}
+  criSocket: "{{ kubelet_config.containerRuntimeEndpoint }}"
+{% endif %}
 {% endif %}
 {% if enable_kubeadm_patches and _target_kube_version is version("1.22", ">=") -%}
 patches:
